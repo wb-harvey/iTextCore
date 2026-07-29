@@ -66,6 +66,7 @@ public class PdfEncryption {
     public const int STANDARD_ENCRYPTION_40 = 2;
     public const int STANDARD_ENCRYPTION_128 = 3;
     public const int AES_128 = 4;
+    public const int AES_256 = 5;
 
     private static byte[] pad = {
         (byte)0x28, (byte)0xBF, (byte)0x4E, (byte)0x5E, (byte)0x4E, (byte)0x75,
@@ -91,6 +92,12 @@ public class PdfEncryption {
     internal byte[] ownerKey = new byte[32];
     /** The encryption key for the user */
     internal byte[] userKey = new byte[32];
+    /** The encrypted user key (R=6) */
+    internal byte[] ueKey;
+    /** The encrypted owner key (R=6) */
+    internal byte[] oeKey;
+    /** The encrypted permissions (R=6) */
+    internal byte[] perms;
     /** The public key security handler for certificate encryption */
     protected PdfPublicKeySecurityHandler publicKeyHandler = null;
     internal int permissions;
@@ -151,6 +158,10 @@ public class PdfEncryption {
             case PdfWriter.ENCRYPTION_AES_128:
                 keyLength = 128;
                 revision = AES_128;
+                break;
+            case PdfWriter.ENCRYPTION_AES_256:
+                keyLength = 256;
+                revision = AES_256;
                 break;
             default:
                 throw new ArgumentException("No valid encryption mode");
@@ -339,6 +350,12 @@ public class PdfEncryption {
     }    
 
     public void SetHashKey(int number, int generation) {
+        if (revision == AES_256) {
+            // AES-256: use the file encryption key directly (no per-object key derivation)
+            key = mkey;
+            keySize = 32;
+            return;
+        }
         md5.Initialize();    //added by ujihara
         extra[0] = (byte)number;
         extra[1] = (byte)(number >> 8);
@@ -490,7 +507,7 @@ public class PdfEncryption {
     }
     
     public int CalculateStreamSize(int n) {
-        if (revision == AES_128)
+        if (revision == AES_128 || revision == AES_256)
             return (n & 0x7ffffff0) + 32;
         else
             return n;
@@ -542,5 +559,236 @@ public class PdfEncryption {
 		}
 		return userPad;
 	}
+
+    // ===================== AES-256 (R=6) Support =====================
+
+    /// <summary>
+    /// ISO 32000-2, Algorithm 2.B — Computing a hash (revision 6).
+    /// Iterative SHA-256/384/512 hash used for password validation and key derivation.
+    /// </summary>
+    internal static byte[] ComputeHashR6(byte[] password, byte[] salt, byte[] userKey) {
+        using (var sha256 = global::System.Security.Cryptography.SHA256.Create())
+        using (var sha384 = global::System.Security.Cryptography.SHA384.Create())
+        using (var sha512 = global::System.Security.Cryptography.SHA512.Create()) {
+            // Step a: SHA-256 of password + salt + userKey
+            sha256.Initialize();
+            sha256.TransformBlock(password, 0, password.Length, password, 0);
+            sha256.TransformBlock(salt, 0, salt.Length, salt, 0);
+            if (userKey != null)
+                sha256.TransformBlock(userKey, 0, userKey.Length, userKey, 0);
+            sha256.TransformFinalBlock(new byte[0], 0, 0);
+            byte[] k = sha256.Hash;
+
+            // Step b-e: iterate
+            int round = 0;
+            while (true) {
+                // Step b: build K1 = password + K + userKey, repeated 64 times
+                int sequenceLen = password.Length + k.Length + (userKey != null ? userKey.Length : 0);
+                byte[] k1 = new byte[sequenceLen * 64];
+                for (int i = 0; i < 64; i++) {
+                    int offset = i * sequenceLen;
+                    global::System.Array.Copy(password, 0, k1, offset, password.Length);
+                    offset += password.Length;
+                    global::System.Array.Copy(k, 0, k1, offset, k.Length);
+                    offset += k.Length;
+                    if (userKey != null)
+                        global::System.Array.Copy(userKey, 0, k1, offset, userKey.Length);
+                }
+
+                // Step c: AES-128-CBC encrypt K1 with first 16 bytes of K as key, next 16 as IV
+                byte[] aesKey = new byte[16];
+                byte[] aesIv = new byte[16];
+                global::System.Array.Copy(k, 0, aesKey, 0, 16);
+                global::System.Array.Copy(k, 16, aesIv, 0, 16);
+
+                byte[] e;
+                using (var aes = global::System.Security.Cryptography.Aes.Create()) {
+                    aes.Mode = global::System.Security.Cryptography.CipherMode.CBC;
+                    aes.Padding = global::System.Security.Cryptography.PaddingMode.None;
+                    aes.Key = aesKey;
+                    aes.IV = aesIv;
+                    using (var enc = aes.CreateEncryptor()) {
+                        e = enc.TransformFinalBlock(k1, 0, k1.Length);
+                    }
+                }
+
+                // Step d: take the first 16 bytes of E, interpret as big-endian 128-bit int, mod 3
+                // determines which SHA to use. We only need the last byte mod 3 for the selection.
+                int bigIntMod3 = BigIntMod3(e);
+
+                // Step e: hash E with the selected SHA
+                switch (bigIntMod3) {
+                    case 0:
+                        k = sha256.ComputeHash(e);
+                        sha256.Initialize();
+                        break;
+                    case 1:
+                        k = sha384.ComputeHash(e);
+                        sha384.Initialize();
+                        break;
+                    default:
+                        k = sha512.ComputeHash(e);
+                        sha512.Initialize();
+                        break;
+                }
+
+                // Step f: check termination — round >= 64 and last byte of E <= round - 32
+                int lastE = e[e.Length - 1] & 0xFF;
+                round++;
+                if (round >= 64 && lastE <= round - 32)
+                    break;
+            }
+
+            // Return first 32 bytes
+            byte[] result = new byte[32];
+            global::System.Array.Copy(k, 0, result, 0, 32);
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// Compute big-endian 128-bit integer from first 16 bytes of data, modulo 3.
+    /// </summary>
+    private static int BigIntMod3(byte[] data) {
+        int rem = 0;
+        for (int i = 0; i < 16 && i < data.Length; i++) {
+            rem = (rem * 256 + (data[i] & 0xFF)) % 3;
+        }
+        return rem;
+    }
+
+    /// <summary>
+    /// Validate the user password for R=6 encryption.
+    /// ISO 32000-2, Algorithm 2.A (validation) — Section 7.6.4.3.3
+    /// </summary>
+    public bool IsUserPasswordR6(byte[] password, byte[] u, byte[] ue) {
+        if (password == null) password = new byte[0];
+        if (password.Length > 127) {
+            byte[] trimmed = new byte[127];
+            global::System.Array.Copy(password, 0, trimmed, 0, 127);
+            password = trimmed;
+        }
+
+        // User Validation Salt = U[32..39]
+        byte[] validationSalt = new byte[8];
+        global::System.Array.Copy(u, 32, validationSalt, 0, 8);
+
+        byte[] hash = ComputeHashR6(password, validationSalt, null);
+
+        // Compare first 32 bytes of U with hash
+        for (int i = 0; i < 32; i++) {
+            if (u[i] != hash[i]) return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// Validate the owner password for R=6 encryption.
+    /// ISO 32000-2, Algorithm 2.A (validation) — Section 7.6.4.3.3
+    /// </summary>
+    public bool IsOwnerPasswordR6(byte[] password, byte[] o, byte[] oe, byte[] u) {
+        if (password == null) password = new byte[0];
+        if (password.Length > 127) {
+            byte[] trimmed = new byte[127];
+            global::System.Array.Copy(password, 0, trimmed, 0, 127);
+            password = trimmed;
+        }
+
+        // Owner Validation Salt = O[32..39]
+        byte[] validationSalt = new byte[8];
+        global::System.Array.Copy(o, 32, validationSalt, 0, 8);
+
+        // U value (48 bytes) is used in owner hash
+        byte[] hash = ComputeHashR6(password, validationSalt, u);
+
+        // Compare first 32 bytes of O with hash
+        for (int i = 0; i < 32; i++) {
+            if (o[i] != hash[i]) return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// Compute the file encryption key from user password for R=6.
+    /// ISO 32000-2, Algorithm 2.A (key recovery) — Section 7.6.4.3.3
+    /// </summary>
+    public byte[] ComputeFileKeyFromUserR6(byte[] password, byte[] u, byte[] ue) {
+        if (password == null) password = new byte[0];
+        if (password.Length > 127) {
+            byte[] trimmed = new byte[127];
+            global::System.Array.Copy(password, 0, trimmed, 0, 127);
+            password = trimmed;
+        }
+
+        // User Key Salt = U[40..47]
+        byte[] keySalt = new byte[8];
+        global::System.Array.Copy(u, 40, keySalt, 0, 8);
+
+        byte[] key2 = ComputeHashR6(password, keySalt, null);
+
+        // Decrypt UE with AES-256-CBC, key = hash, IV = all zeros
+        return DecryptAes256Cbc(key2, ue);
+    }
+
+    /// <summary>
+    /// Compute the file encryption key from owner password for R=6.
+    /// ISO 32000-2, Algorithm 2.A (key recovery) — Section 7.6.4.3.3
+    /// </summary>
+    public byte[] ComputeFileKeyFromOwnerR6(byte[] password, byte[] o, byte[] oe, byte[] u) {
+        if (password == null) password = new byte[0];
+        if (password.Length > 127) {
+            byte[] trimmed = new byte[127];
+            global::System.Array.Copy(password, 0, trimmed, 0, 127);
+            password = trimmed;
+        }
+
+        // Owner Key Salt = O[40..47]
+        byte[] keySalt = new byte[8];
+        global::System.Array.Copy(o, 40, keySalt, 0, 8);
+
+        byte[] key2 = ComputeHashR6(password, keySalt, u);
+
+        // Decrypt OE with AES-256-CBC, key = hash, IV = all zeros
+        return DecryptAes256Cbc(key2, oe);
+    }
+
+    /// <summary>
+    /// AES-256-CBC decryption with zero IV. Used for UE/OE key unwrapping.
+    /// </summary>
+    private static byte[] DecryptAes256Cbc(byte[] key, byte[] data) {
+        using (var aes = global::System.Security.Cryptography.Aes.Create()) {
+            aes.Mode = global::System.Security.Cryptography.CipherMode.CBC;
+            aes.Padding = global::System.Security.Cryptography.PaddingMode.None;
+            aes.Key = key;
+            aes.IV = new byte[16]; // all zeros
+            using (var dec = aes.CreateDecryptor()) {
+                return dec.TransformFinalBlock(data, 0, data.Length);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Setup encryption for R=6 by verifying the password and extracting the file key.
+    /// </summary>
+    public bool SetupByPasswordR6(byte[] documentID, byte[] password, byte[] u, byte[] o,
+                                   byte[] ue, byte[] oe, int permissions, bool encMeta) {
+        this.documentID = documentID;
+        this.permissions = permissions;
+        this.encryptMetadata = encMeta;
+
+        // Try user password first
+        if (IsUserPasswordR6(password, u, ue)) {
+            mkey = ComputeFileKeyFromUserR6(password, u, ue);
+            return true;
+        }
+
+        // Try owner password
+        if (IsOwnerPasswordR6(password, o, oe, u)) {
+            mkey = ComputeFileKeyFromOwnerR6(password, o, oe, u);
+            return true;
+        }
+
+        return false;
+    }
 }
 }

@@ -637,6 +637,23 @@ namespace iTextCore.text.pdf {
                     if (em != null && em.ToString().Equals("false"))
                         cryptoMode |= PdfWriter.DO_NOT_ENCRYPT_METADATA;
                     break;
+                case 5:
+                case 6:
+                    // AES-256 encryption (PDF 2.0)
+                    PdfDictionary dic6 = (PdfDictionary)enc.Get(PdfName.CF);
+                    if (dic6 == null)
+                        throw new InvalidPdfException("/CF not found (encryption)");
+                    PdfDictionary stdcf6 = (PdfDictionary)dic6.Get(PdfName.STDCF);
+                    if (stdcf6 == null)
+                        throw new InvalidPdfException("/StdCF not found (encryption)");
+                    if (PdfName.AESV3.Equals(stdcf6.Get(PdfName.CFM)))
+                        cryptoMode = PdfWriter.ENCRYPTION_AES_256;
+                    else
+                        throw new UnsupportedPdfException("No compatible encryption found");
+                    PdfObject em6 = enc.Get(PdfName.ENCRYPTMETADATA);
+                    if (em6 != null && em6.ToString().Equals("false"))
+                        cryptoMode |= PdfWriter.DO_NOT_ENCRYPT_METADATA;
+                    break;
                 default:
                     throw new UnsupportedPdfException("Unknown encryption type R = " + rValue);
                 }
@@ -731,17 +748,41 @@ namespace iTextCore.text.pdf {
             
             if (filter.Equals(PdfName.STANDARD))
             {
-                //check by owner password
-                decrypt.SetupByOwnerPassword(documentID, password, uValue, oValue, pValue);
-                if (!EqualsArray(uValue, decrypt.userKey, (rValue == 3 || rValue == 4) ? 16 : 32)) {
-                    //check by user password
-                    decrypt.SetupByUserPassword(documentID, password, oValue, pValue);
-                    if (!EqualsArray(uValue, decrypt.userKey, (rValue == 3 || rValue == 4) ? 16 : 32)) {
+                if (rValue == 5 || rValue == 6) {
+                    // AES-256: extract UE, OE and use R6 password validation
+                    byte[] ueValue = null;
+                    byte[] oeValue = null;
+                    PdfObject ueObj = enc.Get(PdfName.UE);
+                    if (ueObj != null) {
+                        strings.Remove(ueObj);
+                        ueValue = DocWriter.GetISOBytes(ueObj.ToString());
+                    }
+                    PdfObject oeObj = enc.Get(PdfName.OE);
+                    if (oeObj != null) {
+                        strings.Remove(oeObj);
+                        oeValue = DocWriter.GetISOBytes(oeObj.ToString());
+                    }
+                    if (ueValue == null || oeValue == null)
+                        throw new InvalidPdfException("Missing /UE or /OE for R=6 encryption");
+
+                    bool encMeta = (cryptoMode & PdfWriter.DO_NOT_ENCRYPT_METADATA) == 0;
+                    if (!decrypt.SetupByPasswordR6(documentID, password, uValue, oValue,
+                                                    ueValue, oeValue, pValue, encMeta)) {
                         throw new BadPasswordException("Bad user password");
                     }
+                } else {
+                    //check by owner password
+                    decrypt.SetupByOwnerPassword(documentID, password, uValue, oValue, pValue);
+                    if (!EqualsArray(uValue, decrypt.userKey, (rValue == 3 || rValue == 4) ? 16 : 32)) {
+                        //check by user password
+                        decrypt.SetupByUserPassword(documentID, password, oValue, pValue);
+                        if (!EqualsArray(uValue, decrypt.userKey, (rValue == 3 || rValue == 4) ? 16 : 32)) {
+                            throw new BadPasswordException("Bad user password");
+                        }
+                    }
+                    else
+                        ownerPasswordUsed = true;
                 }
-                else
-                    ownerPasswordUsed = true;
             } else if (filter.Equals(PdfName.PUBSEC)) {   
                 decrypt.SetupByEncryptionKey(encryptionKey, lengthValue); 
                 ownerPasswordUsed = true;

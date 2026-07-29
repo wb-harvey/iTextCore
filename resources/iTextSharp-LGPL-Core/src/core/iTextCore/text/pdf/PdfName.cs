@@ -125,6 +125,13 @@ namespace iTextCore.text.pdf {
         public static readonly PdfName ADOBE_PPKMS = new PdfName("Adobe.PPKMS");
         /** A name */
         public static readonly PdfName AESV2 = new PdfName("AESV2");
+        /** A name for AES-256 crypt filter (PDF 2.0) */
+        public static readonly PdfName AESV3 = new PdfName("AESV3");
+        /** A name for the user encryption key (R=6) */
+        public static readonly PdfName UE = new PdfName("UE");
+        /** A name for the owner encryption key (R=6) */
+        public static readonly PdfName OE = new PdfName("OE");
+        /** A name for the encrypted permissions (R=6) - NOTE: PERMS already defined elsewhere in this file */
         /** A name */
         public static readonly PdfName AIS = new PdfName("AIS");
         /** A name */

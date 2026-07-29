@@ -1862,6 +1862,8 @@ namespace iTextCore.text.pdf {
         public const int STANDARD_ENCRYPTION_128 = 1;
         /** Type of encryption */
         public const int ENCRYPTION_AES_128 = 2;
+        /** Type of encryption: AES 256-bit (PDF 2.0, R=6, V=5) */
+        public const int ENCRYPTION_AES_256 = 3;
         /** Mask to separate the encryption type from the encryption mode. */
         internal const int ENCRYPTION_MASK = 7;
         /** Add this to the mode to keep the metadata in clear text */
@@ -2659,7 +2661,7 @@ namespace iTextCore.text.pdf {
         
         /**
         * A group attributes dictionary specifying the attributes
-        * of the page’s page group for use in the transparent
+        * of the pageÂ’s page group for use in the transparent
         * imaging model
         */
         protected PdfDictionary group;
