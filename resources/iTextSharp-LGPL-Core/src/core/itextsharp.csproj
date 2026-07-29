@@ -3,7 +3,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>iTextCore</PackageId>
     <VersionPrefix>10.0.1</VersionPrefix>
-    <Authors>Ben Meredith</Authors>
+    <Authors>William Harvey</Authors>
+    <Copyright>Copyright (c) 2026 William Harvey</Copyright>
     <PackageTags>itextcore pdf</PackageTags>
     <PackageProjectUrl>https://github.com/wb-harvey/iTextCore</PackageProjectUrl>
     <PackageLicenseUrl>http://www.gnu.org/licenses/old-licenses/lgpl-2.0-standalone.html</PackageLicenseUrl>

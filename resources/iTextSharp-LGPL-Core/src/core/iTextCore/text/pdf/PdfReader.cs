@@ -18,6 +18,7 @@ using Org.BouncyCastle.X509;
  * 
  *
  * Copyright 2001, 2002 Paulo Soares
+ * Portions Copyright (c) 2026 William Harvey
  *
  * The contents of this file are subject to the Mozilla Public License Version 1.1
  * (the "License"); you may not use this file except in compliance with the License.

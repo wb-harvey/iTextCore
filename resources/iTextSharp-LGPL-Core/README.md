@@ -1,4 +1,5 @@
 # iTextCore 10.0.1 (LGPL / MPL)
+Copyright (c) 2026 William Harvey
 
 iTextCore is an unofficial .NET port of the iTextSharp 4.1.6 library (originally a C# port of the open-source Java library for PDF generation).
 
@@ -29,7 +30,7 @@ This version can be used as a free PDF library in your own closed-source project
 
 ## Updates and bug fixes
 
-Code generation by Claude Opus 4.6
+Code generation and contributions by Claude Opus 4.6
 Code reviews by Gemini Pro 3.1
 
 - [Change] Removed NuGet packaging

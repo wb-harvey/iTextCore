@@ -10,6 +10,7 @@ using Org.BouncyCastle.X509;
  * $Id: PdfEncryption.cs,v 1.13 2007/06/14 20:01:48 psoares33 Exp $
  *
  * Copyright 2001-2006 Paulo Soares
+ * Portions Copyright (c) 2026 William Harvey
  *
  * The contents of this file are subject to the Mozilla Public License Version 1.1
  * (the "License"); you may not use this file except in compliance with the License.
