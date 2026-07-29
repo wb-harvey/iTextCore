@@ -20,6 +20,7 @@ public class IndexModel : PageModel
     public string UploadedFileName { get; set; } = string.Empty;
     public string UploadedFilePath { get; set; } = string.Empty;
     public List<FormFieldInfo> FormFields { get; set; } = new();
+    public PdfMetadata? Metadata { get; set; }
     public string? ErrorMessage { get; set; }
 
     public void OnGet()
@@ -134,5 +135,15 @@ public class IndexModel : PageModel
         UploadedFilePath = filePath;
         UploadedFileName = Path.GetFileName(filePath);
         FormFields = fields;
+
+        // Extract PDF metadata for the metadata card
+        Metadata = _pdfService.GetMetadata(filePath, fields.Count);
+
+        // Strip the GUID prefix from the display filename
+        var displayName = UploadedFileName;
+        var underscoreIndex = displayName.IndexOf('_');
+        if (underscoreIndex > 0)
+            displayName = displayName.Substring(underscoreIndex + 1);
+        Metadata.FileName = displayName;
     }
 }

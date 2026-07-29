@@ -391,58 +391,127 @@ html, body {
     padding-left: 36px;
 }
 
+/* --- Metadata Card --- */
+.metadata-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    animation: fadeInUp 0.4s ease both;
+}
+
+.metadata-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.metadata-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.metadata-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.metadata-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px 20px;
+}
+
+.metadata-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.metadata-item-wide {
+    grid-column: 1 / -1;
+}
+
+.metadata-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.metadata-value {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* --- Fields Grid --- */
 .fields-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-    gap: 16px;
-    margin-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 24px;
 }
 
 .field-card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius);
-    padding: 20px;
+    border-radius: var(--radius-xs);
+    padding: 8px 14px;
     transition: var(--transition);
-    animation: fadeInUp 0.4s ease both;
+    animation: fadeInUp 0.3s ease both;
 }
 
 .field-card:hover {
     border-color: var(--accent);
     background: var(--bg-card-hover);
-    box-shadow: var(--shadow-card);
 }
 
 @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(12px); }
+    from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
 .field-card:nth-child(1) { animation-delay: 0.02s; }
-.field-card:nth-child(2) { animation-delay: 0.04s; }
-.field-card:nth-child(3) { animation-delay: 0.06s; }
-.field-card:nth-child(4) { animation-delay: 0.08s; }
-.field-card:nth-child(5) { animation-delay: 0.10s; }
-.field-card:nth-child(6) { animation-delay: 0.12s; }
-.field-card:nth-child(7) { animation-delay: 0.14s; }
-.field-card:nth-child(8) { animation-delay: 0.16s; }
+.field-card:nth-child(2) { animation-delay: 0.03s; }
+.field-card:nth-child(3) { animation-delay: 0.04s; }
+.field-card:nth-child(4) { animation-delay: 0.05s; }
+.field-card:nth-child(5) { animation-delay: 0.06s; }
+.field-card:nth-child(6) { animation-delay: 0.07s; }
+.field-card:nth-child(7) { animation-delay: 0.08s; }
+.field-card:nth-child(8) { animation-delay: 0.09s; }
 
-.field-header {
+/* Single-row layout: badge | name | control */
+.field-row {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 14px;
 }
 
 .field-type-badge {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 3px 8px;
-    border-radius: 4px;
+    letter-spacing: 0.06em;
+    padding: 2px 6px;
+    border-radius: 3px;
     flex-shrink: 0;
+    white-space: nowrap;
+    min-width: 72px;
+    text-align: center;
 }
 
 .badge-text { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
@@ -453,31 +522,39 @@ html, body {
 .badge-unknown { background: rgba(100, 116, 139, 0.15); color: #94a3b8; }
 
 .field-name {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-primary);
+    white-space: nowrap;
+    flex-shrink: 0;
+    width: 160px;
+    min-width: 160px;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+}
+
+.field-control {
+    flex: 1;
+    min-width: 0;
 }
 
 /* --- Form Controls --- */
 .form-control {
     width: 100%;
-    padding: 10px 14px;
+    padding: 5px 10px;
     background: var(--bg-input);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-xs);
     color: var(--text-primary);
     font-family: var(--font);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     transition: var(--transition);
     outline: none;
 }
 
 .form-control:focus {
     border-color: var(--border-focus);
-    box-shadow: 0 0 0 3px var(--accent-soft);
+    box-shadow: 0 0 0 2px var(--accent-soft);
 }
 
 .form-control::placeholder {
@@ -489,8 +566,8 @@ select.form-control {
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b8fa3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 36px;
+    background-position: right 8px center;
+    padding-right: 28px;
 }
 
 /* --- Checkbox & Radio --- */
@@ -499,9 +576,9 @@ select.form-control {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     color: var(--text-secondary);
     transition: var(--transition);
 }
@@ -520,8 +597,8 @@ select.form-control {
 
 .checkbox-visual,
 .radio-visual {
-    width: 22px;
-    height: 22px;
+    width: 16px;
+    height: 16px;
     border: 2px solid var(--border-color);
     border-radius: var(--radius-xs);
     flex-shrink: 0;
@@ -543,8 +620,8 @@ select.form-control {
 
 .checkbox-visual::after {
     content: '';
-    width: 6px;
-    height: 10px;
+    width: 5px;
+    height: 8px;
     border: solid #fff;
     border-width: 0 2px 2px 0;
     transform: rotate(45deg) scale(0);
@@ -557,8 +634,8 @@ select.form-control {
 
 .radio-visual::after {
     content: '';
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     background: #fff;
     border-radius: 50%;
     transform: scale(0);
@@ -571,8 +648,29 @@ select.form-control {
 
 .radio-group {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    max-height: 80px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.radio-group::-webkit-scrollbar {
+    width: 4px;
+}
+
+.radio-group::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.radio-group::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+}
+
+.radio-label {
+    font-size: 0.72rem;
+    line-height: 1.2;
 }
 
 /* --- Editor Footer --- */

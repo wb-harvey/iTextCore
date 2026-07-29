@@ -75,6 +75,99 @@ public class PdfFormService
     }
 
     /// <summary>
+    /// Extracts metadata from the PDF file for display in the UI.
+    /// </summary>
+    public PdfMetadata GetMetadata(string pdfPath, int formFieldCount)
+    {
+        var fileInfo = new FileInfo(pdfPath);
+        var metadata = new PdfMetadata
+        {
+            FileName = fileInfo.Name,
+            FileSizeBytes = fileInfo.Length,
+            FormFieldCount = formFieldCount
+        };
+
+        PdfReader? reader = null;
+        try
+        {
+            reader = new PdfReader(pdfPath);
+
+            // PdfVersion returns just the minor version char (e.g. '6'), so prepend "1."
+            metadata.PdfVersion = $"1.{reader.PdfVersion}";
+            metadata.PageCount = reader.NumberOfPages;
+            metadata.IsEncrypted = reader.IsEncrypted();
+            metadata.HasForm = reader.AcroFields?.Fields?.Count > 0;
+
+            // Extract page size from the first page (in PDF points: 72 points = 1 inch)
+            if (reader.NumberOfPages > 0)
+            {
+                var pageSize = reader.GetPageSizeWithRotation(1);
+                var widthIn = pageSize.Width / 72.0;
+                var heightIn = pageSize.Height / 72.0;
+                metadata.PageSize = $"{widthIn:F1}\" × {heightIn:F1}\"";
+
+                // Detect common page sizes
+                if (IsApprox(widthIn, 8.5) && IsApprox(heightIn, 11))
+                    metadata.PageSize += " (Letter)";
+                else if (IsApprox(widthIn, 8.5) && IsApprox(heightIn, 14))
+                    metadata.PageSize += " (Legal)";
+                else if (IsApprox(widthIn, 8.27) && IsApprox(heightIn, 11.69))
+                    metadata.PageSize += " (A4)";
+            }
+
+            var info = reader.Info;
+            if (info != null)
+            {
+                metadata.Producer = info["Producer"] as string;
+                metadata.Creator = info["Creator"] as string;
+                metadata.CreationDate = FormatPdfDate(info["CreationDate"] as string);
+                metadata.ModDate = FormatPdfDate(info["ModDate"] as string);
+            }
+        }
+        finally
+        {
+            reader?.Close();
+        }
+
+        return metadata;
+    }
+
+    /// <summary>
+    /// Checks if two double values are approximately equal (within 0.15).
+    /// </summary>
+    private static bool IsApprox(double a, double b) => Math.Abs(a - b) < 0.15;
+
+    /// <summary>
+    /// Converts a PDF date string (e.g. "D:20250306133302-08'00'") to a human-readable format.
+    /// </summary>
+    private static string? FormatPdfDate(string? pdfDate)
+    {
+        if (string.IsNullOrEmpty(pdfDate))
+            return null;
+
+        // Strip the "D:" prefix
+        var s = pdfDate.StartsWith("D:") ? pdfDate.Substring(2) : pdfDate;
+
+        // Try to parse: YYYYMMDDHHmmSS followed by optional timezone
+        if (s.Length >= 14)
+        {
+            try
+            {
+                var year = s.Substring(0, 4);
+                var month = s.Substring(4, 2);
+                var day = s.Substring(6, 2);
+                return $"{year}-{month}-{day}";
+            }
+            catch
+            {
+                // Fall through to return raw string
+            }
+        }
+
+        return pdfDate;
+    }
+
+    /// <summary>
     /// Fills form fields in the PDF with the provided values and returns the resulting PDF bytes.
     /// Optionally flattens the form (making fields non-editable).
     /// </summary>

@@ -59,6 +59,83 @@
                 </div>
             </div>
 
+            @if (Model.Metadata != null)
+            {
+                <div class="metadata-card">
+                    <div class="metadata-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="metadata-icon">
+                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        <span class="metadata-title">Metadata</span>
+                    </div>
+                    <div class="metadata-grid">
+                        <div class="metadata-item">
+                            <span class="metadata-label">File</span>
+                            <span class="metadata-value" title="@Model.Metadata.FileName">@Model.Metadata.FileName</span>
+                        </div>
+                        <div class="metadata-item">
+                            <span class="metadata-label">Size</span>
+                            <span class="metadata-value">@Model.Metadata.FileSizeFormatted</span>
+                        </div>
+                        <div class="metadata-item">
+                            <span class="metadata-label">PDF Version</span>
+                            <span class="metadata-value">@Model.Metadata.PdfVersion</span>
+                        </div>
+                        <div class="metadata-item">
+                            <span class="metadata-label">Pages</span>
+                            <span class="metadata-value">@Model.Metadata.PageCount</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.Metadata.PageSize))
+                        {
+                            <div class="metadata-item">
+                                <span class="metadata-label">Page Size</span>
+                                <span class="metadata-value">@Model.Metadata.PageSize</span>
+                            </div>
+                        }
+                        <div class="metadata-item">
+                            <span class="metadata-label">Has Form</span>
+                            <span class="metadata-value">@(Model.Metadata.HasForm ? "Yes" : "No")</span>
+                        </div>
+                        <div class="metadata-item">
+                            <span class="metadata-label">Form Fields</span>
+                            <span class="metadata-value">@Model.Metadata.FormFieldCount</span>
+                        </div>
+                        <div class="metadata-item">
+                            <span class="metadata-label">Encrypted</span>
+                            <span class="metadata-value">@(Model.Metadata.IsEncrypted ? "Yes" : "No")</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.Metadata.CreationDate))
+                        {
+                            <div class="metadata-item">
+                                <span class="metadata-label">Created</span>
+                                <span class="metadata-value">@Model.Metadata.CreationDate</span>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Metadata.ModDate))
+                        {
+                            <div class="metadata-item">
+                                <span class="metadata-label">Modified</span>
+                                <span class="metadata-value">@Model.Metadata.ModDate</span>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Metadata.Producer))
+                        {
+                            <div class="metadata-item metadata-item-wide">
+                                <span class="metadata-label">Producer</span>
+                                <span class="metadata-value" title="@Model.Metadata.Producer">@Model.Metadata.Producer</span>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Metadata.Creator))
+                        {
+                            <div class="metadata-item metadata-item-wide">
+                                <span class="metadata-label">Creator</span>
+                                <span class="metadata-value" title="@Model.Metadata.Creator">@Model.Metadata.Creator</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
             @if (Model.FormFields.Count == 0)
             {
                 <div class="empty-state">
@@ -78,96 +155,95 @@
                         @foreach (var field in Model.FormFields)
                         {
                             <div class="field-card" data-field-type="@field.FieldType">
-                                <div class="field-header">
+                                <div class="field-row">
                                     <span class="field-type-badge badge-@field.FieldType.ToString().ToLower()">@field.FieldType</span>
-                                    <span class="field-name">@field.Name</span>
-                                </div>
-                                <div class="field-control">
-                                    @switch (field.FieldType)
-                                    {
-                                        case PdfSharp.Models.FormFieldType.Text:
-                                            <input type="text"
-                                                   name="field_@field.Name"
-                                                   value="@field.CurrentValue"
-                                                   class="form-control"
-                                                   placeholder="Enter value..." />
-                                            break;
-
-                                        case PdfSharp.Models.FormFieldType.Checkbox:
-                                            <label class="checkbox-control">
-                                                <input type="hidden" name="field_@field.Name" value="Off" />
-                                                <input type="checkbox"
+                                    <span class="field-name" title="@field.Name">@field.Name</span>
+                                    <div class="field-control">
+                                        @switch (field.FieldType)
+                                        {
+                                            case PdfSharp.Models.FormFieldType.Text:
+                                                <input type="text"
                                                        name="field_@field.Name"
-                                                       value="Yes"
-                                                       @(field.CurrentValue == "Yes" || field.CurrentValue == "On" ? "checked" : "") />
-                                                <span class="checkbox-visual"></span>
-                                                <span class="checkbox-label">Checked</span>
-                                            </label>
-                                            break;
+                                                       value="@field.CurrentValue"
+                                                       class="form-control"
+                                                       placeholder="Enter value..." />
+                                                break;
 
-                                        case PdfSharp.Models.FormFieldType.RadioButton:
-                                            <div class="radio-group">
-                                                @foreach (var option in field.Options)
+                                            case PdfSharp.Models.FormFieldType.Checkbox:
+                                                <label class="checkbox-control">
+                                                    <input type="hidden" name="field_@field.Name" value="Off" />
+                                                    <input type="checkbox"
+                                                           name="field_@field.Name"
+                                                           value="Yes"
+                                                           @(field.CurrentValue == "Yes" || field.CurrentValue == "On" ? "checked" : "") />
+                                                    <span class="checkbox-visual"></span>
+                                                </label>
+                                                break;
+
+                                            case PdfSharp.Models.FormFieldType.RadioButton:
+                                                <div class="radio-group">
+                                                    @foreach (var option in field.Options)
+                                                    {
+                                                        <label class="radio-control">
+                                                            <input type="radio"
+                                                                   name="field_@field.Name"
+                                                                   value="@option"
+                                                                   @(field.CurrentValue == option ? "checked" : "") />
+                                                            <span class="radio-visual"></span>
+                                                            <span class="radio-label">@option</span>
+                                                        </label>
+                                                    }
+                                                </div>
+                                                break;
+
+                                            case PdfSharp.Models.FormFieldType.ComboBox:
+                                            case PdfSharp.Models.FormFieldType.ListBox:
+                                                var isListBox = field.FieldType == PdfSharp.Models.FormFieldType.ListBox;
+                                                @if (isListBox)
                                                 {
-                                                    <label class="radio-control">
-                                                        <input type="radio"
-                                                               name="field_@field.Name"
-                                                               value="@option"
-                                                               @(field.CurrentValue == option ? "checked" : "") />
-                                                        <span class="radio-visual"></span>
-                                                        <span class="radio-label">@option</span>
-                                                    </label>
+                                                    <select name="field_@field.Name" class="form-control" size="3">
+                                                        <option value="">— Select —</option>
+                                                        @foreach (var option in field.Options)
+                                                        {
+                                                            if (field.CurrentValue == option)
+                                                            {
+                                                                <option value="@option" selected>@option</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@option">@option</option>
+                                                            }
+                                                        }
+                                                    </select>
                                                 }
-                                            </div>
-                                            break;
+                                                else
+                                                {
+                                                    <select name="field_@field.Name" class="form-control">
+                                                        <option value="">— Select —</option>
+                                                        @foreach (var option in field.Options)
+                                                        {
+                                                            if (field.CurrentValue == option)
+                                                            {
+                                                                <option value="@option" selected>@option</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@option">@option</option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                }
+                                                break;
 
-                                        case PdfSharp.Models.FormFieldType.ComboBox:
-                                        case PdfSharp.Models.FormFieldType.ListBox:
-                                            var isListBox = field.FieldType == PdfSharp.Models.FormFieldType.ListBox;
-                                            @if (isListBox)
-                                            {
-                                                <select name="field_@field.Name" class="form-control" size="4">
-                                                    <option value="">— Select —</option>
-                                                    @foreach (var option in field.Options)
-                                                    {
-                                                        if (field.CurrentValue == option)
-                                                        {
-                                                            <option value="@option" selected>@option</option>
-                                                        }
-                                                        else
-                                                        {
-                                                            <option value="@option">@option</option>
-                                                        }
-                                                    }
-                                                </select>
-                                            }
-                                            else
-                                            {
-                                                <select name="field_@field.Name" class="form-control">
-                                                    <option value="">— Select —</option>
-                                                    @foreach (var option in field.Options)
-                                                    {
-                                                        if (field.CurrentValue == option)
-                                                        {
-                                                            <option value="@option" selected>@option</option>
-                                                        }
-                                                        else
-                                                        {
-                                                            <option value="@option">@option</option>
-                                                        }
-                                                    }
-                                                </select>
-                                            }
-                                            break;
-
-                                        default:
-                                            <input type="text"
-                                                   name="field_@field.Name"
-                                                   value="@field.CurrentValue"
-                                                   class="form-control"
-                                                   placeholder="Enter value..." />
-                                            break;
-                                    }
+                                            default:
+                                                <input type="text"
+                                                       name="field_@field.Name"
+                                                       value="@field.CurrentValue"
+                                                       class="form-control"
+                                                       placeholder="Enter value..." />
+                                                break;
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         }
