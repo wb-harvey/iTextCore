@@ -298,6 +298,11 @@ public class PdfEncryption {
 
     // gets keylength and revision and uses revison to choose the initial values for permissions
     public void SetupAllKeys(byte[] userPassword, byte[] ownerPassword, int permissions) {
+        if (revision == AES_256) {
+            // R=6 uses completely different key derivation (SHA-256 based)
+            SetupAllKeysR6(userPassword, ownerPassword, permissions);
+            return;
+        }
         if (ownerPassword == null || ownerPassword.Length == 0)
             ownerPassword = md5.ComputeHash(CreateDocumentId());
         md5.Initialize();
@@ -465,6 +470,28 @@ public class PdfEncryption {
                 dic.Put(PdfName.V, new PdfNumber(2));
                 dic.Put(PdfName.LENGTH, new PdfNumber(128));
                 
+            }
+            else if (revision == AES_256) {
+                // AES-256 (R=6, V=5)
+                if (!encryptMetadata)
+                    dic.Put(PdfName.ENCRYPTMETADATA, PdfBoolean.PDFFALSE);
+                dic.Put(PdfName.R, new PdfNumber(AES_256));
+                dic.Put(PdfName.V, new PdfNumber(5));
+                dic.Put(PdfName.LENGTH, new PdfNumber(256));
+                dic.Put(PdfName.O, new PdfLiteral(PdfContentByte.EscapeString(ownerKey)));
+                dic.Put(PdfName.U, new PdfLiteral(PdfContentByte.EscapeString(userKey)));
+                dic.Put(PdfName.OE, new PdfLiteral(PdfContentByte.EscapeString(oeKey)));
+                dic.Put(PdfName.UE, new PdfLiteral(PdfContentByte.EscapeString(ueKey)));
+                dic.Put(PdfName.PERMS, new PdfLiteral(PdfContentByte.EscapeString(perms)));
+                PdfDictionary stdcf256 = new PdfDictionary();
+                stdcf256.Put(PdfName.LENGTH, new PdfNumber(32));
+                stdcf256.Put(PdfName.AUTHEVENT, PdfName.DOCOPEN);
+                stdcf256.Put(PdfName.CFM, PdfName.AESV3);
+                PdfDictionary cf256 = new PdfDictionary();
+                cf256.Put(PdfName.STDCF, stdcf256);
+                dic.Put(PdfName.CF, cf256);
+                dic.Put(PdfName.STRF, PdfName.STDCF);
+                dic.Put(PdfName.STMF, PdfName.STDCF);
             }
             else {
                 if (!encryptMetadata)
@@ -750,6 +777,127 @@ public class PdfEncryption {
 
         // Decrypt OE with AES-256-CBC, key = hash, IV = all zeros
         return DecryptAes256Cbc(key2, oe);
+    }
+
+    /// <summary>
+    /// AES-256-CBC encryption with zero IV. Used for UE/OE key wrapping.
+    /// </summary>
+    private static byte[] EncryptAes256Cbc(byte[] key, byte[] data) {
+        using (var aes = global::System.Security.Cryptography.Aes.Create()) {
+            aes.Mode = global::System.Security.Cryptography.CipherMode.CBC;
+            aes.Padding = global::System.Security.Cryptography.PaddingMode.None;
+            aes.Key = key;
+            aes.IV = new byte[16]; // all zeros
+            using (var enc = aes.CreateEncryptor()) {
+                return enc.TransformFinalBlock(data, 0, data.Length);
+            }
+        }
+    }
+
+    /// <summary>
+    /// ISO 32000-2, Algorithm 2.C — Compute the Perms value for R=6.
+    /// </summary>
+    private byte[] ComputePermsR6(int permissions, bool encryptMeta) {
+        byte[] permsData = new byte[16];
+        // Bytes 0-3: permissions as unsigned 32-bit little-endian
+        permsData[0] = (byte)permissions;
+        permsData[1] = (byte)(permissions >> 8);
+        permsData[2] = (byte)(permissions >> 16);
+        permsData[3] = (byte)(permissions >> 24);
+        // Bytes 4-7: 0xFF if encrypting metadata, 0x54 ('T') otherwise
+        permsData[4] = encryptMeta ? (byte)0xFF : (byte)0x54;
+        permsData[5] = encryptMeta ? (byte)0xFF : (byte)0x54;
+        permsData[6] = encryptMeta ? (byte)0xFF : (byte)0x54;
+        permsData[7] = encryptMeta ? (byte)0xFF : (byte)0x54;
+        // Bytes 8-11: 'adb1' marker
+        permsData[8] = (byte)'a';
+        permsData[9] = (byte)'d';
+        permsData[10] = (byte)'b';
+        permsData[11] = (byte)'1';
+        // Bytes 12-15: random
+        byte[] rand4 = new byte[4];
+        using (var rng = new global::System.Security.Cryptography.RNGCryptoServiceProvider())
+            rng.GetBytes(rand4);
+        global::System.Array.Copy(rand4, 0, permsData, 12, 4);
+
+        // Encrypt with AES-256-ECB (no padding) using the file encryption key
+        using (var aes = global::System.Security.Cryptography.Aes.Create()) {
+            aes.Mode = global::System.Security.Cryptography.CipherMode.ECB;
+            aes.Padding = global::System.Security.Cryptography.PaddingMode.None;
+            aes.Key = mkey;
+            using (var enc = aes.CreateEncryptor()) {
+                return enc.TransformFinalBlock(permsData, 0, 16);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Generate all encryption keys for R=6 (AES-256) from user and owner passwords.
+    /// ISO 32000-2, Section 7.6.4.3.3 — Algorithms for key generation.
+    /// </summary>
+    public void SetupAllKeysR6(byte[] userPassword, byte[] ownerPassword, int permissions) {
+        if (userPassword == null) userPassword = new byte[0];
+        if (ownerPassword == null || ownerPassword.Length == 0)
+            ownerPassword = userPassword;
+        // Truncate passwords to 127 bytes (UTF-8)
+        if (userPassword.Length > 127) {
+            byte[] t = new byte[127];
+            global::System.Array.Copy(userPassword, 0, t, 0, 127);
+            userPassword = t;
+        }
+        if (ownerPassword.Length > 127) {
+            byte[] t = new byte[127];
+            global::System.Array.Copy(ownerPassword, 0, t, 0, 127);
+            ownerPassword = t;
+        }
+
+        this.permissions = permissions | unchecked((int)0xfffff000);
+        this.permissions &= unchecked((int)0xfffffffc);
+
+        // Generate random 32-byte file encryption key
+        mkey = new byte[32];
+        using (var rng = new global::System.Security.Cryptography.RNGCryptoServiceProvider())
+            rng.GetBytes(mkey);
+
+        // Generate random salts (8 bytes each: validation salt + key salt)
+        byte[] userValSalt = new byte[8];
+        byte[] userKeySalt = new byte[8];
+        byte[] ownerValSalt = new byte[8];
+        byte[] ownerKeySalt = new byte[8];
+        using (var rng = new global::System.Security.Cryptography.RNGCryptoServiceProvider()) {
+            rng.GetBytes(userValSalt);
+            rng.GetBytes(userKeySalt);
+            rng.GetBytes(ownerValSalt);
+            rng.GetBytes(ownerKeySalt);
+        }
+
+        // Compute U (48 bytes) = hash(pwd, valSalt) + valSalt + keySalt
+        byte[] userHash = ComputeHashR6(userPassword, userValSalt, null);
+        userKey = new byte[48];
+        global::System.Array.Copy(userHash, 0, userKey, 0, 32);
+        global::System.Array.Copy(userValSalt, 0, userKey, 32, 8);
+        global::System.Array.Copy(userKeySalt, 0, userKey, 40, 8);
+
+        // Compute UE (32 bytes) = AES-256-CBC-encrypt(fileKey) with hash(pwd, keySalt) as key
+        byte[] userKeyForUE = ComputeHashR6(userPassword, userKeySalt, null);
+        ueKey = EncryptAes256Cbc(userKeyForUE, mkey);
+
+        // Compute O (48 bytes) = hash(pwd, valSalt, U) + valSalt + keySalt
+        byte[] ownerHash = ComputeHashR6(ownerPassword, ownerValSalt, userKey);
+        ownerKey = new byte[48];
+        global::System.Array.Copy(ownerHash, 0, ownerKey, 0, 32);
+        global::System.Array.Copy(ownerValSalt, 0, ownerKey, 32, 8);
+        global::System.Array.Copy(ownerKeySalt, 0, ownerKey, 40, 8);
+
+        // Compute OE (32 bytes) = AES-256-CBC-encrypt(fileKey) with hash(pwd, keySalt, U) as key
+        byte[] ownerKeyForOE = ComputeHashR6(ownerPassword, ownerKeySalt, userKey);
+        oeKey = EncryptAes256Cbc(ownerKeyForOE, mkey);
+
+        // Compute Perms (16 bytes)
+        perms = ComputePermsR6(this.permissions, encryptMetadata);
+
+        // Set document ID
+        documentID = CreateDocumentId();
     }
 
     /// <summary>
