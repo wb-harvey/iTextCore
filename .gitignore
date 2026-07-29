@@ -1,0 +1,16 @@
+# Build outputs
+bin/
+obj/
+**/bin/
+**/obj/
+
+# IDE
+.vs/
+*.user
+*.suo
+
+# Uploads (runtime data)
+wwwroot/uploads/
+
+# Agent workspace
+.agents/
