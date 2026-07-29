@@ -83,31 +83,59 @@
         }, 6000);
     }
 
-    // --- Submit loading state ---
+    // --- Submit loading state (fetch-based download) ---
     const fieldForm = document.getElementById('fieldForm');
     if (fieldForm) {
-        fieldForm.addEventListener('submit', function () {
+        fieldForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
             const btn = fieldForm.querySelector('.btn-primary');
-            if (btn) {
-                const originalHtml = btn.innerHTML;
-                // Defer the disabling of the button to allow the form submission to proceed
-                setTimeout(() => {
-                    btn.disabled = true;
-                    btn.innerHTML = `
-                        <svg class="spinner btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
-                        </svg>
-                        Processing...
-                    `;
-                }, 10);
-                
-                // Restore the button state after a reasonable delay
-                // since the download doesn't reload the page
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.innerHTML = originalHtml;
-                }, 3000);
-            }
+            if (!btn) return;
+
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `
+                <svg class="spinner btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
+                </svg>
+                Processing...
+            `;
+
+            const formData = new FormData(fieldForm);
+
+            fetch(fieldForm.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Download failed');
+                // Extract filename from Content-Disposition header
+                const disposition = response.headers.get('Content-Disposition') || '';
+                let filename = 'filled.pdf';
+                const match = disposition.match(/filename\*?=(?:UTF-8'')?([^;"\s]+)/i);
+                if (match) filename = decodeURIComponent(match[1]);
+                return response.blob().then(blob => ({ blob, filename }));
+            })
+            .then(({ blob, filename }) => {
+                // Create a temporary link and trigger the download
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            })
+            .catch(err => {
+                console.error('Download error:', err);
+                alert('Download failed. Please try again.');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            });
         });
     }
 })();
+

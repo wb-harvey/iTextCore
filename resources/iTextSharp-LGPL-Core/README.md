@@ -40,6 +40,8 @@ Code reviews by Gemini Pro 3.1
 - [Fix] Suppressed obsolete BouncyCastle API warnings in third-party source
 - [Add] Added support for AES-256 encrypted PDF files (R-5, R-6 encryptions)
 - [Fix] Improve flatten PDF by removing Helvetica font error
+- [Fix] Defensive code for browser error when download button disabled before download completes
+
 
  
 
