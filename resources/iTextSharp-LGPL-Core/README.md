@@ -19,7 +19,13 @@ There are many "modern" PDF features that were introduced in newer versions of i
 
 - [Corporate homepage of iText](http://itextpdf.com/)
 
-This library, however, maintains LGPL licensing.
+This library includes dependencies and components with permissive licensing:
+- **jCraft ZLIB**: 3-Clause BSD license.
+- **BouncyCastle** (`Portable.BouncyCastle`): MIT License (Legion of the Bouncy Castle).
+
+The unmodified source code and copyright notices for included components are preserved.
+
+This library is provided with LGPL 2.1 licensing.
 
 Code generation by Claude Opus 4.6
 Code reviews by Gemini Pro 3.1
