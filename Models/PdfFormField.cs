@@ -2,7 +2,7 @@ namespace PdfSharp.Models;
 
 /// <summary>
 /// Represents a single form field extracted from a PDF document.
-/// Named FormFieldInfo to avoid collision with iTextSharp.text.pdf.PdfFormField.
+/// Named FormFieldInfo to avoid collision with iTextCore.text.pdf.PdfFormField.
 /// </summary>
 public class FormFieldInfo
 {
@@ -14,7 +14,7 @@ public class FormFieldInfo
 
 /// <summary>
 /// Enumerates the supported PDF form field types.
-/// Maps to iTextSharp AcroFields field type constants.
+/// Maps to iTextCore AcroFields field type constants.
 /// </summary>
 public enum FormFieldType
 {

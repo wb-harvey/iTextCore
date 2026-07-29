@@ -1,8 +1,8 @@
 # Security Review — PDF Form Filler
 
-## Code Changes Made to iTextSharp-LGPL-Core
+## Code Changes Made to iTextCore Engine (forked from iTextSharp-LGPL-Core)
 
-The following changes were applied to the cloned [itextsharp.csproj](file:///c:/AI/PdfSharp/resources/iTextSharp-LGPL-Core/src/core/itextsharp.csproj) source:
+The following changes were applied to the [itextsharp.csproj](file:///c:/AI/PdfSharp/resources/iTextSharp-LGPL-Core/src/core/itextsharp.csproj) source (rebranded as iTextCore 10.0.1):
 
 | Change | Original | Updated | Reason |
 |--------|----------|---------|--------|

@@ -5,7 +5,7 @@ using PdfSharp.Models;
 namespace PdfSharp.Services;
 
 /// <summary>
-/// Service that wraps iTextSharp operations for reading and populating PDF form fields.
+/// Service that wraps iTextCore operations for reading and populating PDF form fields.
 /// Uses PdfReader to extract AcroFields metadata and PdfStamper to write updated values.
 /// </summary>
 public class PdfFormService
@@ -108,7 +108,7 @@ public class PdfFormService
     }
 
     /// <summary>
-    /// Maps iTextSharp's integer field type constants to our FormFieldType enum.
+    /// Maps iTextCore's integer field type constants to our FormFieldType enum.
     /// </summary>
     private static FormFieldType MapFieldType(int iTextFieldType)
     {

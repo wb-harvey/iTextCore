@@ -5,7 +5,7 @@
     <VersionPrefix>10.0.1</VersionPrefix>
     <Authors>Ben Meredith</Authors>
     <PackageTags>itextcore pdf</PackageTags>
-    <PackageProjectUrl>https://github.com/bmeredith/iTextSharp-LGPL-Core</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/wb-harvey/iTextCore</PackageProjectUrl>
     <PackageLicenseUrl>http://www.gnu.org/licenses/old-licenses/lgpl-2.0-standalone.html</PackageLicenseUrl>
     <Description>iTextCore 10.0.1 — .NET Core PDF engine under the LGPL.</Description>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
