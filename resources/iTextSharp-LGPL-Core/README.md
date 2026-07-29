@@ -1,23 +1,23 @@
 # iTextCore 10.0.1 (LGPL / MPL)
 
-iTextCore is an unofficial .NET Core port of the iTextSharp 4.1.6 library, which is a port of open source Java library for PDF generation written entirely in C# for the .NET platform.
+iTextCore is an unofficial .NET port of the iTextSharp 4.1.6 library (originally a C# port of the open-source Java library for PDF generation).
 
-It is LGPL, based on the legacy iTextSharp 4.1.6 codebase, which was the last version of the library released under the Mozilla Public License and the LGPL before the project moved to the AGPL. 
-
-You can use this version if you need a free PDF library for use in closed-source projects.
 
 ## Supported Frameworks
 The following frameworks are supported:
-- .Net Core 10
-- .Net Standard 2
+- .NET 10.0
+- .NET Standard 2.0
 
 ## Installation
 Build from source, and use the library for your own projects.
 
-## Updates and bug fixes
+## Compatibility
 There are many "modern" PDF features that were introduced in newer versions of iText, and you may want to use them with a paid license from the company that owns iText:
 
 - [Corporate homepage of iText](http://itextpdf.com/)
+
+## Licensing
+This library is LGPL 2.1, based on the legacy iTextSharp 4.1.6 codebase, which was the last version of the library released under the Mozilla Public License and the LGPL before the project moved to the AGPL. 
 
 This library includes dependencies and components with permissive licensing:
 - **jCraft ZLIB**: 3-Clause BSD license.
@@ -25,7 +25,9 @@ This library includes dependencies and components with permissive licensing:
 
 The unmodified source code and copyright notices for included components are preserved.
 
-This library is provided with LGPL 2.1 licensing.
+This version can be used as a free PDF library in your own closed-source projects.
+
+## Updates and bug fixes
 
 Code generation by Claude Opus 4.6
 Code reviews by Gemini Pro 3.1
