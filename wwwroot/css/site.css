@@ -490,6 +490,7 @@ select.form-control {
 /* --- Checkbox & Radio --- */
 .checkbox-control,
 .radio-control {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -564,7 +565,7 @@ select.form-control {
 
 .radio-group {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 12px;
 }
 

@@ -89,13 +89,24 @@
         fieldForm.addEventListener('submit', function () {
             const btn = fieldForm.querySelector('.btn-primary');
             if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = `
-                    <svg class="spinner btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
-                    </svg>
-                    Processing...
-                `;
+                const originalHtml = btn.innerHTML;
+                // Defer the disabling of the button to allow the form submission to proceed
+                setTimeout(() => {
+                    btn.disabled = true;
+                    btn.innerHTML = `
+                        <svg class="spinner btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
+                        </svg>
+                        Processing...
+                    `;
+                }, 10);
+                
+                // Restore the button state after a reasonable delay
+                // since the download doesn't reload the page
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }, 3000);
             }
         });
     }

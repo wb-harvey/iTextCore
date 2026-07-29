@@ -39,6 +39,8 @@ Code reviews by Gemini Pro 3.1
 - [Fix] Removed duplicate reference to System.Text.Encoding.CodePages
 - [Fix] Suppressed obsolete BouncyCastle API warnings in third-party source
 - [Add] Added support for AES-256 encrypted PDF files (R-5, R-6 encryptions)
+- [Fix] Improve flatten PDF by removing Helvetica font error
+
  
 
 
