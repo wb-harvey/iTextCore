@@ -2,7 +2,7 @@
 
 ## Code Changes Made to iTextCore Engine (forked from iTextSharp-LGPL-Core)
 
-The following changes were applied to the [itextsharp.csproj](file:///c:/AI/PdfSharp/resources/iTextSharp-LGPL-Core/src/core/itextsharp.csproj) source (rebranded as iTextCore 10.0.1):
+The following changes were applied to the [itextsharp.csproj](./resources/iTextSharp-LGPL-Core/src/core/itextsharp.csproj) source (rebranded as iTextCore 10.0.1):
 
 | Change | Original | Updated | Reason |
 |--------|----------|---------|--------|
@@ -19,7 +19,7 @@ The following changes were applied to the [itextsharp.csproj](file:///c:/AI/PdfS
 
 ### 🔴 Critical — Path Traversal via `pdfPath` Hidden Field
 
-**File:** [Index.cshtml.cs](file:///c:/AI/PdfSharp/Pages/Index.cshtml.cs) (line 75)  
+**File:** [Index.cshtml.cs](./Pages/Index.cshtml.cs) (line 75)  
 **Issue:** The `pdfPath` value comes from a hidden form field that a malicious user could modify to point to any file on disk. The `OnPostDownload` handler reads whatever path is submitted and processes it through `PdfReader`.
 
 ```csharp
@@ -43,7 +43,7 @@ if (!fullPath.StartsWith(uploadsDir, StringComparison.OrdinalIgnoreCase))
 
 ### 🔴 Critical — Path Traversal via `path` Query String
 
-**File:** [Index.cshtml.cs](file:///c:/AI/PdfSharp/Pages/Index.cshtml.cs) (line 28)  
+**File:** [Index.cshtml.cs](./Pages/Index.cshtml.cs) (line 28)  
 **Issue:** The `OnGet` handler accepts an arbitrary file path from the query string and passes it to `PdfReader`:
 
 ```csharp
@@ -60,7 +60,7 @@ if (!string.IsNullOrEmpty(path) && System.IO.File.Exists(path))
 
 ### 🟡 High — No Upload File Size Limit
 
-**File:** [Program.cs](file:///c:/AI/PdfSharp/Program.cs)  
+**File:** [Program.cs](./Program.cs)  
 **Issue:** No request size limit is configured. A malicious user could upload extremely large files to consume disk space or memory.
 
 **Recommendation:** Add Kestrel request body size limits:
@@ -76,7 +76,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(optio
 
 ### 🟡 High — Uploaded Files Never Cleaned Up
 
-**File:** [Index.cshtml.cs](file:///c:/AI/PdfSharp/Pages/Index.cshtml.cs) (line 55)  
+**File:** [Index.cshtml.cs](./Pages/Index.cshtml.cs) (line 55)  
 **Issue:** Files are saved to `wwwroot/uploads/` with unique GUID names but are never deleted. Over time this will consume disk space, and the files are served as static files.
 
 **Recommendation:**
@@ -88,7 +88,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(optio
 
 ### 🟡 High — Uploaded PDFs Served as Static Files
 
-**File:** [Program.cs](file:///c:/AI/PdfSharp/Program.cs) (line 22)  
+**File:** [Program.cs](./Program.cs) (line 22)  
 **Issue:** `app.UseStaticFiles()` serves everything in `wwwroot/`, including `wwwroot/uploads/`. Anyone with the GUID filename can download any uploaded PDF directly.
 
 **Recommendation:** Either:
@@ -114,7 +114,7 @@ app.UseStaticFiles(new StaticFileOptions
 
 ### 🟡 Medium — Filename Injection in Upload
 
-**File:** [Index.cshtml.cs](file:///c:/AI/PdfSharp/Pages/Index.cshtml.cs) (line 54)  
+**File:** [Index.cshtml.cs](./Pages/Index.cshtml.cs) (line 54)  
 **Issue:** The original filename from the user is included in the saved path: `$"{Guid.NewGuid():N}_{pdfFile.FileName}"`. If the filename contains path separators or special characters, it could cause issues.
 
 **Recommendation:** Sanitize the filename:
@@ -128,7 +128,7 @@ var uniqueName = $"{Guid.NewGuid():N}_{safeName}";
 
 ### 🟡 Medium — Exception Details Exposed to Users
 
-**File:** [Index.cshtml.cs](file:///c:/AI/PdfSharp/Pages/Index.cshtml.cs) (lines 67, 112)  
+**File:** [Index.cshtml.cs](./Pages/Index.cshtml.cs) (lines 67, 112)  
 **Issue:** Raw `ex.Message` is shown to the user. In production, exception messages can leak internal paths, stack details, or library internals.
 
 ```csharp
@@ -146,7 +146,7 @@ ErrorMessage = "An error occurred processing the PDF. Please try again.";
 
 ### 🟢 Low — Content-Type Validation
 
-**File:** [Index.cshtml.cs](file:///c:/AI/PdfSharp/Pages/Index.cshtml.cs) (line 43)  
+**File:** [Index.cshtml.cs](./Pages/Index.cshtml.cs) (line 43)  
 **Issue:** Only the file extension is checked (`.pdf`). A malicious file could be renamed to `.pdf`.
 
 **Recommendation:** Also validate the Content-Type and/or check the file's magic bytes:
@@ -164,21 +164,21 @@ if (pdfFile.ContentType != "application/pdf")
 
 ### 🟢 Low — Antiforgery Token
 
-**File:** [Index.cshtml](file:///c:/AI/PdfSharp/Pages/Index.cshtml)  
+**File:** [Index.cshtml](./Pages/Index.cshtml)  
 **Status:** ✅ Already handled — ASP.NET Core Razor Pages includes antiforgery tokens automatically via the `asp-page-handler` tag helper. CSRF protection is active by default.
 
 ---
 
 ### 🟢 Low — HTTPS Redirection
 
-**File:** [Program.cs](file:///c:/AI/PdfSharp/Program.cs) (line 21)  
+**File:** [Program.cs](./Program.cs) (line 21)  
 **Status:** ✅ Already configured — `app.UseHttpsRedirection()` and `app.UseHsts()` are in place.
 
 ---
 
 ### 🟢 Low — XSS via Razor Output
 
-**File:** [Index.cshtml](file:///c:/AI/PdfSharp/Pages/Index.cshtml)  
+**File:** [Index.cshtml](./Pages/Index.cshtml)  
 **Status:** ✅ Mitigated — Razor `@` expressions are HTML-encoded by default. Field names and values rendered via `@field.Name`, `@field.CurrentValue`, etc. are auto-escaped.
 
 ---
