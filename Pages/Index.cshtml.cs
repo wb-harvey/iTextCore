@@ -105,8 +105,7 @@ public class IndexModel : PageModel
             var flatten = Request.Form["flatten"].FirstOrDefault() == "true";
             var keepSignatures = Request.Form["keepSignatures"].FirstOrDefault() == "true";
             
-            float textPaddingY = -1f;
-            if (float.TryParse(Request.Form["textPaddingY"].FirstOrDefault(), out var ty)) textPaddingY = ty;
+            float textPaddingY = flatten ? -2f : -1f;
 
             var filledPdf = _pdfService.FillForm(pdfPath, fieldValues, flatten, keepSignatures, false, false, false, textPaddingY);
 
