@@ -1,5 +1,5 @@
 @page
-@model PdfSharp.Pages.IndexModel
+@model iTextCore.Pages.IndexModel
 @{
     ViewData["Title"] = "PDF Form Editor";
 }
@@ -161,7 +161,7 @@
                                     <div class="field-control">
                                         @switch (field.FieldType)
                                         {
-                                            case PdfSharp.Models.FormFieldType.Text:
+                                            case iTextCore.Models.FormFieldType.Text:
                                                 <input type="text"
                                                        name="field_@field.Name"
                                                        value="@field.CurrentValue"
@@ -169,7 +169,7 @@
                                                        placeholder="Enter value..." />
                                                 break;
 
-                                            case PdfSharp.Models.FormFieldType.Checkbox:
+                                            case iTextCore.Models.FormFieldType.Checkbox:
                                                 <label class="checkbox-control">
                                                     <input type="hidden" name="field_@field.Name" value="Off" />
                                                     <input type="checkbox"
@@ -180,7 +180,7 @@
                                                 </label>
                                                 break;
 
-                                            case PdfSharp.Models.FormFieldType.RadioButton:
+                                            case iTextCore.Models.FormFieldType.RadioButton:
                                                 <div class="radio-group">
                                                     @foreach (var option in field.Options)
                                                     {
@@ -196,9 +196,9 @@
                                                 </div>
                                                 break;
 
-                                            case PdfSharp.Models.FormFieldType.ComboBox:
-                                            case PdfSharp.Models.FormFieldType.ListBox:
-                                                var isListBox = field.FieldType == PdfSharp.Models.FormFieldType.ListBox;
+                                            case iTextCore.Models.FormFieldType.ComboBox:
+                                            case iTextCore.Models.FormFieldType.ListBox:
+                                                var isListBox = field.FieldType == iTextCore.Models.FormFieldType.ListBox;
                                                 @if (isListBox)
                                                 {
                                                     <select name="field_@field.Name" class="form-control" size="3">

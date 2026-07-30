@@ -101,7 +101,7 @@ namespace iTextCore.text.pdf {
             else if (forceRead) {
                 Stream s = null;
                 try {
-                    s = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    s = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                     this.arrayIn = InputStreamToArray(s);
                 }
                 finally {
@@ -110,7 +110,7 @@ namespace iTextCore.text.pdf {
                 return;
             }
             this.filename = filename;
-            rf = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+            rf = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         }
 
         public RandomAccessFileOrArray(Uri url) {

@@ -1,8 +1,8 @@
 using System.Collections;
 using iTextCore.text.pdf;
-using PdfSharp.Models;
+using iTextCore.Models;
 
-namespace PdfSharp.Services;
+namespace iTextCore.Services;
 
 /// <summary>
 /// Service that wraps iTextCore operations for reading and populating PDF form fields.
@@ -169,9 +169,16 @@ public class PdfFormService
 
     /// <summary>
     /// Fills form fields in the PDF with the provided values and returns the resulting PDF bytes.
-    /// Optionally flattens the form (making fields non-editable).
+    /// By default, the output PDF has no owner password, no encryption, and no certificates.
+    /// Set the keep* parameters to true to preserve the original security settings.
     /// </summary>
-    public byte[] FillForm(string pdfPath, Dictionary<string, string> fieldValues, bool flatten = false)
+    public byte[] FillForm(
+        string pdfPath,
+        Dictionary<string, string> fieldValues,
+        bool flatten = false,
+        bool keepOwnerPassword = false,
+        bool keepEncryption = false,
+        bool keepCertificates = false)
     {
         PdfReader? reader = null;
         PdfStamper? stamper = null;
@@ -179,10 +186,31 @@ public class PdfFormService
 
         try
         {
+            // Enable bypass so PdfStamper doesn't throw on encrypted PDFs
+            // even when the owner password is unknown
+            PdfReader.AllowOpenWithoutOwnerPassword = true;
+
             reader = new PdfReader(pdfPath);
-            stamper = new PdfStamper(reader, outputStream);
+
+            if (keepEncryption || keepOwnerPassword || keepCertificates)
+            {
+                // Append mode preserves the original encryption, owner password,
+                // and certificate settings from the source PDF
+                stamper = new PdfStamper(reader, outputStream, '\0', true);
+            }
+            else
+            {
+                // Standard mode rewrites the PDF without encryption,
+                // producing a clean output with no security restrictions
+                stamper = new PdfStamper(reader, outputStream);
+            }
 
             var acroFields = stamper.AcroFields;
+
+            // Remove XFA from the PDF to prevent Adobe Acrobat from throwing type validation 
+            // errors (e.g. "Invalid value 'Off' specified for element...") during form synchronization.
+            var acroFormDict = reader.Catalog.GetAsDict(PdfName.ACROFORM);
+            acroFormDict?.Remove(PdfName.XFA);
 
             foreach (var kvp in fieldValues)
             {
@@ -195,6 +223,7 @@ public class PdfFormService
         {
             stamper?.Close();
             reader?.Close();
+            PdfReader.AllowOpenWithoutOwnerPassword = false;
         }
 
         return outputStream.ToArray();

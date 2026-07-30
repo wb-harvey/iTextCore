@@ -1,7 +1,7 @@
-﻿using itextsharp.System.Encodings;
+using iTextCore.System.Encodings;
 using Xunit;
 
-namespace itextsharp.Tests.System.Encodings
+namespace iTextCore.Tests.System.Encodings
 {
     public class EncodingsCatalogTests
     {

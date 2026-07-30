@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <AssemblyName>iTextCore.API</AssemblyName>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <PackageId>iTextCore</PackageId>
     <VersionPrefix>10.0.1</VersionPrefix>
     <Authors>William Harvey</Authors>

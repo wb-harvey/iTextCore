@@ -1,4 +1,4 @@
-namespace PdfSharp.Models;
+namespace iTextCore.Models;
 
 /// <summary>
 /// Represents a single form field extracted from a PDF document.

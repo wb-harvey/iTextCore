@@ -124,6 +124,13 @@ namespace iTextCore.text.pdf {
         * Holds value of property appendable.
         */
         private bool appendable;
+
+        /**
+        * When set to true, allows PdfStamper to modify documents even without
+        * the owner password. This enables stripping encryption from the output.
+        * Equivalent to iText5's 'unethicalreading' flag.
+        */
+        public static bool AllowOpenWithoutOwnerPassword { get; set; } = false;
         
         protected internal PdfReader() {
         }
@@ -3480,7 +3487,7 @@ namespace iTextCore.text.pdf {
         */
         public bool IsOpenedWithFullPermissions {
             get {
-                return !encrypted || ownerPasswordUsed;
+                return !encrypted || ownerPasswordUsed || AllowOpenWithoutOwnerPassword;
             }
         } 
 

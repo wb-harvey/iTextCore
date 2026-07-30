@@ -1,4 +1,4 @@
-namespace PdfSharp.Models;
+namespace iTextCore.Models;
 
 /// <summary>
 /// Holds metadata extracted from a PDF document for display in the UI.

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using PdfSharp.Models;
-using PdfSharp.Services;
+using iTextCore.Models;
+using iTextCore.Services;
 
-namespace PdfSharp.Pages;
+namespace iTextCore.Pages;
 
 public class IndexModel : PageModel
 {
@@ -27,7 +27,7 @@ public class IndexModel : PageModel
     {
         // Check if there's a file path from a previous upload in query string
         var path = Request.Query["path"].FirstOrDefault();
-        if (!string.IsNullOrEmpty(path) && System.IO.File.Exists(path))
+        if (!string.IsNullOrEmpty(path) && global::System.IO.File.Exists(path))
         {
             LoadPdfFields(path);
         }
@@ -82,7 +82,7 @@ public class IndexModel : PageModel
     public IActionResult OnPostDownload()
     {
         var pdfPath = Request.Form["pdfPath"].FirstOrDefault();
-        if (string.IsNullOrEmpty(pdfPath) || !System.IO.File.Exists(pdfPath))
+        if (string.IsNullOrEmpty(pdfPath) || !global::System.IO.File.Exists(pdfPath))
         {
             ErrorMessage = "The uploaded PDF could not be found. Please upload again.";
             return Page();
@@ -118,10 +118,12 @@ public class IndexModel : PageModel
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Error filling PDF: {ex.Message}";
-            // Re-load fields so the user can try again
-            LoadPdfFields(pdfPath);
-            return Page();
+            // Return a JSON error so the fetch-based download JS can detect failure
+            // instead of saving the HTML error page as a file
+            return new JsonResult(new { error = $"Error filling PDF: {ex.Message}" })
+            {
+                StatusCode = 500
+            };
         }
     }
 

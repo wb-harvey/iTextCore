@@ -109,9 +109,9 @@ namespace iTextCore.text {
         * This constant may only be changed by Paulo Soares and/or Bruno Lowagie.
         * @since	2.1.6
         */
-	    private const String RELEASE = "4.1.6";
+	    private const String RELEASE = "10.0.1";
 	    /** This constant may only be changed by Paulo Soares and/or Bruno Lowagie. */
-	    private const String ITEXT_VERSION = ITEXT + " " + RELEASE + " by 1T3XT";
+	    private const String ITEXT_VERSION = ITEXT + " " + RELEASE;
 
         ///<summary> Allows the pdf documents to be produced without compression for debugging purposes. </summary>
         public static bool Compress = true;

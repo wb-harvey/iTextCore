@@ -41,6 +41,10 @@ Code reviews by Gemini Pro 3.1
 - [Add] Added support for AES-256 encrypted PDF files (R-5, R-6 encryptions)
 - [Fix] Improve flatten PDF by removing Helvetica font error
 - [Fix] Defensive code for browser error when download button disabled before download completes
+- [Change] Strip XFA (XML Forms Architecture) while preserving AcroForms in exported PDFs
+
+
+
 
 
  

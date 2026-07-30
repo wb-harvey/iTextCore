@@ -4,13 +4,14 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>PdfSharp</RootNamespace>
+    <RootNamespace>iTextCore</RootNamespace>
+    <AssemblyName>iTextCore.Web</AssemblyName>
     <!-- Prevent SDK from auto-including .cs files under resources/ -->
     <DefaultItemExcludes>$(DefaultItemExcludes);resources/**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="resources\iTextSharp-LGPL-Core\src\core\itextsharp.csproj" />
+    <ProjectReference Include="resources\iTextSharp-LGPL-Core\src\core\iTextCore.csproj" />
   </ItemGroup>
 
 </Project>

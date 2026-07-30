@@ -108,12 +108,26 @@
                 body: formData
             })
             .then(response => {
-                if (!response.ok) throw new Error('Download failed');
+                const contentType = response.headers.get('Content-Type') || '';
+
+                // Server returns JSON with an error field on failure
+                if (!response.ok || contentType.includes('application/json')) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Download failed');
+                    });
+                }
+
                 // Extract filename from Content-Disposition header
                 const disposition = response.headers.get('Content-Disposition') || '';
                 let filename = 'filled.pdf';
-                const match = disposition.match(/filename\*?=(?:UTF-8'')?([^;"\s]+)/i);
-                if (match) filename = decodeURIComponent(match[1]);
+                // Handle: filename="name.pdf" or filename=name.pdf or filename*=UTF-8''name.pdf
+                const quoted = disposition.match(/filename="([^"]+)"/i);
+                const unquoted = disposition.match(/filename=([^;\s"]+)/i);
+                const star = disposition.match(/filename\*=UTF-8''([^;\s]+)/i);
+                if (star) filename = decodeURIComponent(star[1]);
+                else if (quoted) filename = quoted[1];
+                else if (unquoted) filename = unquoted[1];
+
                 return response.blob().then(blob => ({ blob, filename }));
             })
             .then(({ blob, filename }) => {
@@ -129,7 +143,7 @@
             })
             .catch(err => {
                 console.error('Download error:', err);
-                alert('Download failed. Please try again.');
+                alert(err.message || 'Download failed. Please try again.');
             })
             .finally(() => {
                 btn.disabled = false;

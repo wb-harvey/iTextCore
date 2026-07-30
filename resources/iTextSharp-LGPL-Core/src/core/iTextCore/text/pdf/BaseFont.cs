@@ -5,6 +5,7 @@ using global::System.Diagnostics;
 using global::System.IO;
 using global::System.Text;
 using global::System.Collections;
+using System.Collections.Concurrent;
 using System.util;
 using iTextCore.text.xml.simpleparser;
 
@@ -232,7 +233,7 @@ namespace iTextCore.text.pdf {
         public const bool NOT_CACHED = false;
     
         /** The path to the font resources. */    
-        public const string RESOURCE_PATH = "itextsharp.iTextCore.text.pdf.fonts.";
+        public const string RESOURCE_PATH = "iTextCore.iTextCore.text.pdf.fonts.";
         /** The fake CID code that represents a newline. */    
         public const char CID_NEWLINE = '\u7fff';
 
@@ -272,10 +273,10 @@ namespace iTextCore.text.pdf {
         protected bool fontSpecific = true;
     
         /** cache for the fonts already used. */
-        protected static Hashtable fontCache = new Hashtable();
+        protected static ConcurrentDictionary<string, BaseFont> fontCache = new ConcurrentDictionary<string, BaseFont>();
     
         /** list of the 14 built in fonts. */
-        protected static Hashtable BuiltinFonts14 = new Hashtable();
+        protected static ConcurrentDictionary<string, PdfName> BuiltinFonts14 = new ConcurrentDictionary<string, PdfName>();
     
         /** Forces the output of the width array. Only matters for the 14
          * built-in fonts.
@@ -305,20 +306,20 @@ namespace iTextCore.text.pdf {
         private static Random random = new Random();
 
         static BaseFont() {
-            BuiltinFonts14.Add(COURIER, PdfName.COURIER);
-            BuiltinFonts14.Add(COURIER_BOLD, PdfName.COURIER_BOLD);
-            BuiltinFonts14.Add(COURIER_BOLDOBLIQUE, PdfName.COURIER_BOLDOBLIQUE);
-            BuiltinFonts14.Add(COURIER_OBLIQUE, PdfName.COURIER_OBLIQUE);
-            BuiltinFonts14.Add(HELVETICA, PdfName.HELVETICA);
-            BuiltinFonts14.Add(HELVETICA_BOLD, PdfName.HELVETICA_BOLD);
-            BuiltinFonts14.Add(HELVETICA_BOLDOBLIQUE, PdfName.HELVETICA_BOLDOBLIQUE);
-            BuiltinFonts14.Add(HELVETICA_OBLIQUE, PdfName.HELVETICA_OBLIQUE);
-            BuiltinFonts14.Add(SYMBOL, PdfName.SYMBOL);
-            BuiltinFonts14.Add(TIMES_ROMAN, PdfName.TIMES_ROMAN);
-            BuiltinFonts14.Add(TIMES_BOLD, PdfName.TIMES_BOLD);
-            BuiltinFonts14.Add(TIMES_BOLDITALIC, PdfName.TIMES_BOLDITALIC);
-            BuiltinFonts14.Add(TIMES_ITALIC, PdfName.TIMES_ITALIC);
-            BuiltinFonts14.Add(ZAPFDINGBATS, PdfName.ZAPFDINGBATS);
+            BuiltinFonts14.TryAdd(COURIER, PdfName.COURIER);
+            BuiltinFonts14.TryAdd(COURIER_BOLD, PdfName.COURIER_BOLD);
+            BuiltinFonts14.TryAdd(COURIER_BOLDOBLIQUE, PdfName.COURIER_BOLDOBLIQUE);
+            BuiltinFonts14.TryAdd(COURIER_OBLIQUE, PdfName.COURIER_OBLIQUE);
+            BuiltinFonts14.TryAdd(HELVETICA, PdfName.HELVETICA);
+            BuiltinFonts14.TryAdd(HELVETICA_BOLD, PdfName.HELVETICA_BOLD);
+            BuiltinFonts14.TryAdd(HELVETICA_BOLDOBLIQUE, PdfName.HELVETICA_BOLDOBLIQUE);
+            BuiltinFonts14.TryAdd(HELVETICA_OBLIQUE, PdfName.HELVETICA_OBLIQUE);
+            BuiltinFonts14.TryAdd(SYMBOL, PdfName.SYMBOL);
+            BuiltinFonts14.TryAdd(TIMES_ROMAN, PdfName.TIMES_ROMAN);
+            BuiltinFonts14.TryAdd(TIMES_BOLD, PdfName.TIMES_BOLD);
+            BuiltinFonts14.TryAdd(TIMES_BOLDITALIC, PdfName.TIMES_BOLDITALIC);
+            BuiltinFonts14.TryAdd(TIMES_ITALIC, PdfName.TIMES_ITALIC);
+            BuiltinFonts14.TryAdd(ZAPFDINGBATS, PdfName.ZAPFDINGBATS);
         }
     
         /** Generates the PDF stream with the Type1 and Truetype fonts returning
@@ -662,10 +663,7 @@ namespace iTextCore.text.pdf {
             BaseFont fontBuilt = null;
             string key = name + "\n" + encoding + "\n" + embedded;
             if (cached) {
-                lock (fontCache) {
-                    fontFound = (BaseFont)fontCache[key];
-                }
-                if (fontFound != null)
+                if (fontCache.TryGetValue(key, out fontFound))
                     return fontFound;
             }
             if (isBuiltinFonts14 || name.ToLower(global::System.Globalization.CultureInfo.InvariantCulture).EndsWith(".afm") || name.ToLower(global::System.Globalization.CultureInfo.InvariantCulture).EndsWith(".pfm")) {
@@ -687,12 +685,7 @@ namespace iTextCore.text.pdf {
             else
                 throw new DocumentException("Font '" + name + "' with '" + encoding + "' is not recognized.");
             if (cached) {
-                lock (fontCache) {
-                    fontFound = (BaseFont)fontCache[key];
-                    if (fontFound != null)
-                        return fontFound;
-                    fontCache.Add(key, fontBuilt);
-                }
+                return fontCache.GetOrAdd(key, fontBuilt);
             }
             return fontBuilt;
         }
