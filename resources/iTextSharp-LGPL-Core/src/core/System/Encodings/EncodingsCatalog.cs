@@ -1,6 +1,6 @@
-using System.Text;
+﻿using System.Text;
 
-namespace iTextCore.System.Encodings
+namespace UsefulPdfNet.System.Encodings
 {
     public static class EncodingsCatalog
     {

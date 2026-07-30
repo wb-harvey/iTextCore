@@ -1,4 +1,4 @@
-namespace iTextCore.Models;
+﻿namespace UsefulPdfNet.Models;
 
 /// <summary>
 /// Holds metadata extracted from a PDF document for display in the UI.

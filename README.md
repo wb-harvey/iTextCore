@@ -1,8 +1,8 @@
-# iTextCore 10.0.1 (LGPL / MPL)
+﻿# UsefulPdfNet 10.0.1 (LGPL / MPL)
 
 Copyright (c) 2026 William Harvey
 
-iTextCore is an unofficial .NET port of the iTextSharp 4.1.6 library, originally a C# port of the open-source Java library for PDF generation.
+UsefulPdfNet is an unofficial .NET port of the iTextSharp 4.1.6 library, originally a C# port of the open-source Java library for PDF generation.
 
 ## Supported Frameworks
 
@@ -13,12 +13,6 @@ The following frameworks are supported:
 ## Installation
 
 Build from source, and use the library for your own projects.
-
-## Compatibility
-
-There are many "modern" PDF features that were introduced in newer versions of iText. You may want to use them with a paid license from the company that owns iText:
-
-- [Corporate homepage of iText](http://itextpdf.com/)
 
 ## Licensing
 
@@ -31,6 +25,11 @@ This library includes dependencies and components with permissive licensing:
 The unmodified source code and copyright notices for included components are preserved.
 
 This version can be used as a free PDF library in your own closed-source projects.
+
+There are many newer PDF features that were introduced in newer versions of iText.
+If you need that you might want to get a paid license from iText:
+
+- [Corporate homepage of iText](http://itextpdf.com/)
 
 ## Updates and Bug Fixes
 
@@ -47,6 +46,7 @@ Code reviews by Gemini Pro 3.1.
 - **[Fix]** Suppressed obsolete BouncyCastle API warnings in third-party source.
 - **[Fix]** Improve flatten PDF by removing Helvetica font error.
 - **[Fix]** Defensive code for browser error when download button disabled before download completes.
+- **[Fix]** Add Text Padding Y option. Value -1.0 matches Adobe proprietary text rendering
 
 ## The Evolution of PDF Files and ISO Standards
 
@@ -63,4 +63,4 @@ XFA was a failed attempt by Adobe to force a proprietary forms structure into PD
 
 eSignatures are an ongoing issue. Many providers offer various levels of verifiable eSignature capabilities and stuff them into PDF documents. This adds layers of proprietary digital signing and modifications to PDF files to verify provenance. The vendors trying this start with Adobe and continue down the alphabet. It's a mess. 
 
-This version of iTextCore does not support XFA or eSignatures.
+This version of UsefulPdfNet does not support XFA or eSignatures.

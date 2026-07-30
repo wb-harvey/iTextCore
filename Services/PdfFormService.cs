@@ -1,11 +1,11 @@
 using System.Collections;
-using iTextCore.text.pdf;
-using iTextCore.Models;
+using UsefulPdfNet.text.pdf;
+using UsefulPdfNet.Models;
 
-namespace iTextCore.Services;
+namespace UsefulPdfNet.Services;
 
 /// <summary>
-/// Service that wraps iTextCore operations for reading and populating PDF form fields.
+/// Service that wraps UsefulPdfNet operations for reading and populating PDF form fields.
 /// Uses PdfReader to extract AcroFields metadata and PdfStamper to write updated values.
 /// </summary>
 public class PdfFormService
@@ -179,7 +179,8 @@ public class PdfFormService
         bool keepSignatures = false,
         bool keepOwnerPassword = false,
         bool keepEncryption = false,
-        bool keepCertificates = false)
+        bool keepCertificates = false,
+        float textPaddingY = 0f)
     {
         PdfReader? reader = null;
         PdfStamper? stamper = null;
@@ -218,6 +219,10 @@ public class PdfFormService
             
             if (acroFields != null)
             {
+                if (textPaddingY != 0f)
+                {
+                    acroFields.SetExtraMargin(0f, textPaddingY);
+                }
                 if (!keepSignatures)
                 {
                     // Remove any actual signature fields
@@ -250,7 +255,7 @@ public class PdfFormService
     }
 
     /// <summary>
-    /// Maps iTextCore's integer field type constants to our FormFieldType enum.
+    /// Maps UsefulPdfNet's integer field type constants to our FormFieldType enum.
     /// </summary>
     private static FormFieldType MapFieldType(int iTextFieldType)
     {

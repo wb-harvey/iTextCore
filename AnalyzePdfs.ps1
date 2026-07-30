@@ -1,12 +1,14 @@
-Add-Type -Path "C:\AI\iTextCore\resources\iTextSharp-LGPL-Core\src\core\bin\Debug\netstandard2.0\iTextCore.API.dll"
-[iTextCore.text.pdf.PdfReader]::AllowOpenWithoutOwnerPassword = $true
+﻿Add-Type -Path "C:\AI\UsefulPdfNet\resources\iTextSharp-LGPL-Core\src\core\bin\Debug\netstandard2.0\BouncyCastle.Crypto.dll"
+Add-Type -Path "C:\AI\UsefulPdfNet\resources\iTextSharp-LGPL-Core\src\core\bin\Debug\netstandard2.0\System.Text.Encoding.CodePages.dll"
+Add-Type -Path "C:\AI\UsefulPdfNet\resources\iTextSharp-LGPL-Core\src\core\bin\Debug\netstandard2.0\UsefulPdfNet.API.dll"
+[UsefulPdfNet.text.pdf.PdfReader]::AllowOpenWithoutOwnerPassword = $true
 
 $pdfs = Get-ChildItem -Path "C:\Users\user\Documents\PDF-analysis" -Recurse -Filter *.pdf
 $results = @()
 
 foreach ($pdf in $pdfs) {
     try {
-        $reader = New-Object iTextCore.text.pdf.PdfReader($pdf.FullName)
+        $reader = New-Object UsefulPdfNet.text.pdf.PdfReader($pdf.FullName)
         
         $filename = $pdf.BaseName
         $fileSize = $pdf.Length

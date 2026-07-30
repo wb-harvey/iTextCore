@@ -1,8 +1,8 @@
-# Security Review — PDF Form Filler
+﻿# Security Review — PDF Form Filler
 
-## Code Changes Made to iTextCore Engine (forked from iTextSharp-LGPL-Core)
+## Code Changes Made to UsefulPdfNet Engine (forked from iTextSharp-LGPL-Core)
 
-The following changes were applied to the [itextsharp.csproj](./resources/iTextSharp-LGPL-Core/src/core/itextsharp.csproj) source (rebranded as iTextCore 10.0.1):
+The following changes were applied to the [itextsharp.csproj](./resources/iTextSharp-LGPL-Core/src/core/itextsharp.csproj) source (rebranded as UsefulPdfNet 10.0.1):
 
 | Change | Original | Updated | Reason |
 |--------|----------|---------|--------|

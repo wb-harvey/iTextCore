@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using iTextCore.Models;
-using iTextCore.Services;
+using UsefulPdfNet.Models;
+using UsefulPdfNet.Services;
 
-namespace iTextCore.Pages;
+namespace UsefulPdfNet.Pages;
 
 public class IndexModel : PageModel
 {
@@ -104,7 +104,11 @@ public class IndexModel : PageModel
 
             var flatten = Request.Form["flatten"].FirstOrDefault() == "true";
             var keepSignatures = Request.Form["keepSignatures"].FirstOrDefault() == "true";
-            var filledPdf = _pdfService.FillForm(pdfPath, fieldValues, flatten, keepSignatures);
+            
+            float textPaddingY = -1f;
+            if (float.TryParse(Request.Form["textPaddingY"].FirstOrDefault(), out var ty)) textPaddingY = ty;
+
+            var filledPdf = _pdfService.FillForm(pdfPath, fieldValues, flatten, keepSignatures, false, false, false, textPaddingY);
 
             // Derive a nice download filename
             var originalName = Path.GetFileName(pdfPath);

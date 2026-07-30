@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Text;
 using System.IO;
 using System.Collections;
-using iTextCore.System.Encodings;
+using UsefulPdfNet.System.Encodings;
 
 namespace System.util
 {

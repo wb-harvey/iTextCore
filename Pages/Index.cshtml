@@ -1,5 +1,5 @@
 @page
-@model iTextCore.Pages.IndexModel
+@model UsefulPdfNet.Pages.IndexModel
 @{
     ViewData["Title"] = "PDF Form Editor";
 }
@@ -161,7 +161,7 @@
                                     <div class="field-control">
                                         @switch (field.FieldType)
                                         {
-                                            case iTextCore.Models.FormFieldType.Text:
+                                            case UsefulPdfNet.Models.FormFieldType.Text:
                                                 <input type="text"
                                                        name="field_@field.Name"
                                                        value="@field.CurrentValue"
@@ -169,7 +169,7 @@
                                                        placeholder="Enter value..." />
                                                 break;
 
-                                            case iTextCore.Models.FormFieldType.Checkbox:
+                                            case UsefulPdfNet.Models.FormFieldType.Checkbox:
                                                 <label class="checkbox-control">
                                                     <input type="hidden" name="field_@field.Name" value="Off" />
                                                     <input type="checkbox"
@@ -180,7 +180,7 @@
                                                 </label>
                                                 break;
 
-                                            case iTextCore.Models.FormFieldType.RadioButton:
+                                            case UsefulPdfNet.Models.FormFieldType.RadioButton:
                                                 <div class="radio-group">
                                                     @foreach (var option in field.Options)
                                                     {
@@ -196,9 +196,9 @@
                                                 </div>
                                                 break;
 
-                                            case iTextCore.Models.FormFieldType.ComboBox:
-                                            case iTextCore.Models.FormFieldType.ListBox:
-                                                var isListBox = field.FieldType == iTextCore.Models.FormFieldType.ListBox;
+                                            case UsefulPdfNet.Models.FormFieldType.ComboBox:
+                                            case UsefulPdfNet.Models.FormFieldType.ListBox:
+                                                var isListBox = field.FieldType == UsefulPdfNet.Models.FormFieldType.ListBox;
                                                 @if (isListBox)
                                                 {
                                                     <select name="field_@field.Name" class="form-control" size="3">
@@ -260,6 +260,9 @@
                             <span class="checkbox-visual"></span>
                             <span class="checkbox-label">Keep digital signatures</span>
                         </label>
+                        <div class="offset-controls" style="margin-left: 20px; display: flex; align-items: center; gap: 10px; color: var(--text-secondary); font-size: 0.9rem;">
+                            <label style="display: flex; align-items: center; gap: 5px;">Text Padding Y: <input type="number" name="textPaddingY" value="-1" step="0.1" style="width: 70px;" class="form-control" /></label>
+                        </div>
                         <button type="submit" class="btn btn-primary btn-lg">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>

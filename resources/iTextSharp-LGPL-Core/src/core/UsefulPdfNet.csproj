@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>UsefulPdfNet.API</AssemblyName>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <PackageId>UsefulPdfNet</PackageId>
+    <VersionPrefix>10.0.1</VersionPrefix>
+    <Authors>William Harvey</Authors>
+    <Copyright>Copyright (c) 2026 William Harvey</Copyright>
+    <PackageTags>itextcore pdf</PackageTags>
+    <PackageProjectUrl>https://github.com/wb-harvey/UsefulPdfNet</PackageProjectUrl>
+    <PackageLicenseUrl>http://www.gnu.org/licenses/old-licenses/lgpl-2.0-standalone.html</PackageLicenseUrl>
+    <Description>UsefulPdfNet 10.0.1 — .NET Core PDF engine under the LGPL.</Description>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <NoWarn>$(NoWarn);CS0612;CS0618</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="UsefulPdfNet\text\pdf\fonts\*.afm" />
+    <None Remove="UsefulPdfNet\text\pdf\fonts\glyphlist.txt" />
+    <EmbeddedResource Include="UsefulPdfNet\text\pdf\fonts\*.afm" />
+    <EmbeddedResource Include="UsefulPdfNet\text\pdf\fonts\glyphlist.txt" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="Portable.BouncyCastle" Version="1.8.1.3" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.7.1" />
+  </ItemGroup>
+
+</Project>
