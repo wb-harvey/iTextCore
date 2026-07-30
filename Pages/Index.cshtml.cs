@@ -103,7 +103,8 @@ public class IndexModel : PageModel
             }
 
             var flatten = Request.Form["flatten"].FirstOrDefault() == "true";
-            var filledPdf = _pdfService.FillForm(pdfPath, fieldValues, flatten);
+            var keepSignatures = Request.Form["keepSignatures"].FirstOrDefault() == "true";
+            var filledPdf = _pdfService.FillForm(pdfPath, fieldValues, flatten, keepSignatures);
 
             // Derive a nice download filename
             var originalName = Path.GetFileName(pdfPath);

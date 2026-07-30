@@ -176,6 +176,7 @@ public class PdfFormService
         string pdfPath,
         Dictionary<string, string> fieldValues,
         bool flatten = false,
+        bool keepSignatures = false,
         bool keepOwnerPassword = false,
         bool keepEncryption = false,
         bool keepCertificates = false)
@@ -217,6 +218,19 @@ public class PdfFormService
             
             if (acroFields != null)
             {
+                if (!keepSignatures)
+                {
+                    // Remove any actual signature fields
+                    var sigNames = acroFields.GetSignatureNames();
+                    foreach (string name in sigNames)
+                    {
+                        acroFields.RemoveField(name);
+                    }
+                    
+                    // Remove SigFlags from AcroForm so viewers don't expect a signature
+                    acroFormDict?.Remove(PdfName.SIGFLAGS);
+                }
+
                 foreach (var kvp in fieldValues)
                 {
                     acroFields.SetField(kvp.Key, kvp.Value);
