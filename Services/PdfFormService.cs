@@ -191,6 +191,9 @@ public class PdfFormService
             PdfReader.AllowOpenWithoutOwnerPassword = true;
 
             reader = new PdfReader(pdfPath);
+            
+            // Remove Adobe Reader Extended Features (Usage Rights) which restrict document changes.
+            reader.RemoveUsageRights();
 
             if (keepEncryption || keepOwnerPassword || keepCertificates)
             {
@@ -205,16 +208,19 @@ public class PdfFormService
                 stamper = new PdfStamper(reader, outputStream);
             }
 
-            var acroFields = stamper.AcroFields;
-
             // Remove XFA from the PDF to prevent Adobe Acrobat from throwing type validation 
             // errors (e.g. "Invalid value 'Off' specified for element...") during form synchronization.
-            var acroFormDict = reader.Catalog.GetAsDict(PdfName.ACROFORM);
+            var acroFormDict = reader.Catalog?.GetAsDict(PdfName.ACROFORM);
             acroFormDict?.Remove(PdfName.XFA);
 
-            foreach (var kvp in fieldValues)
+            var acroFields = stamper.AcroFields;
+            
+            if (acroFields != null)
             {
-                acroFields.SetField(kvp.Key, kvp.Value);
+                foreach (var kvp in fieldValues)
+                {
+                    acroFields.SetField(kvp.Key, kvp.Value);
+                }
             }
 
             stamper.FormFlattening = flatten;
