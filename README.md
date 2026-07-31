@@ -1,4 +1,4 @@
-# UsefulPdfNet 10.0.1 (LGPL / MPL)
+﻿# UsefulPdfNet 10.0.1 (LGPL / MPL)
 
 Copyright (c) 2026 William Harvey
 
@@ -52,11 +52,11 @@ Code reviews by Gemini Pro 3.1.
 PDF is dead.  
 Long live PDF.  
 
-PDF files are supposed to follow the ISO standard:
+PDF files are supposed to follow these ISO standards:
 - [ISO 32000-1 (PDF 1.7) 2008](https://www.iso.org/standard/51502.html)
 - [ISO 32000-2 (PDF 2.0)](https://www.iso.org/standard/75839.html)
-- [ISO 32000-2:2017](https://www.iso.org/standard/63530.html)
-- [ISO 32000-2:2020](https://www.iso.org/standard/75839.html)
+- [ISO 32000-2:2017]
+- [ISO 32000-2:2020]
 
 XFA was a failed attempt by Adobe to force a proprietary forms structure into PDF files, but all modern browsers do not use it. Often, users will experience issues if they open a PDF fillable document in their browser, save it, and then find the form blank when they open it in Adobe Acrobat.
 
