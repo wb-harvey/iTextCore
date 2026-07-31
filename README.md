@@ -1,4 +1,4 @@
-﻿# UsefulPdfNet 10.0.1 (LGPL / MPL)
+# UsefulPdfNet 10.0.1 (LGPL / MPL)
 
 Copyright (c) 2026 William Harvey
 
@@ -26,8 +26,7 @@ The unmodified source code and copyright notices for included components are pre
 
 This version can be used as a free PDF library in your own closed-source projects.
 
-There are many newer PDF features that were introduced in newer versions of iText.
-If you need that you might want to get a paid license from iText:
+There are many newer PDF features that were introduced in newer versions of iTextSharp and iTextCore.  If you need that you might want to get a paid license from iText:  
 
 - [Corporate homepage of iText](http://itextpdf.com/)
 
@@ -54,10 +53,10 @@ PDF is dead.
 Long live PDF.  
 
 PDF files are supposed to follow the ISO standard:
-- [ISO 32000-1 (PDF 1.7) 2008](https://www.iso.org/standard/63530.html)
-- [ISO 32000-2 (PDF 2.0)](https://www.iso.org/standard/81456.html)
-- ISO 32000-2:2017 
-- ISO 32000-2:2020
+- [ISO 32000-1 (PDF 1.7) 2008](https://www.iso.org/standard/51502.html)
+- [ISO 32000-2 (PDF 2.0)](https://www.iso.org/standard/75839.html)
+- [ISO 32000-2:2017](https://www.iso.org/standard/63530.html)
+- [ISO 32000-2:2020](https://www.iso.org/standard/75839.html)
 
 XFA was a failed attempt by Adobe to force a proprietary forms structure into PDF files, but all modern browsers do not use it. Often, users will experience issues if they open a PDF fillable document in their browser, save it, and then find the form blank when they open it in Adobe Acrobat.
 
