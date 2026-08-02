@@ -69,71 +69,44 @@
                         <span class="metadata-title">Metadata</span>
                     </div>
                     <div class="metadata-grid">
-                        <div class="metadata-item">
+                        <div class="metadata-item metadata-item-wide">
                             <span class="metadata-label">File</span>
-                            <span class="metadata-value" title="@Model.Metadata.FileName">@Model.Metadata.FileName</span>
+                            <span class="metadata-value" title="@Model.Metadata.FileName">@Model.Metadata.FileName (@Model.Metadata.FileSizeFormatted)</span>
                         </div>
-                        <div class="metadata-item">
-                            <span class="metadata-label">Size</span>
-                            <span class="metadata-value">@Model.Metadata.FileSizeFormatted</span>
+                        <div class="metadata-item metadata-item-wide">
+                            <span class="metadata-label">Document</span>
+                            <span class="metadata-value">
+                                PDF @Model.Metadata.PdfVersion &bull; @Model.Metadata.PageCount Pages
+                                @if (!string.IsNullOrEmpty(Model.Metadata.PageSize)) { <text>&bull; @Model.Metadata.PageSize</text> }
+                                &bull; Encrypted: @(Model.Metadata.IsEncrypted ? "Yes" : "No")
+                            </span>
                         </div>
-                        <div class="metadata-item">
-                            <span class="metadata-label">PDF Version</span>
-                            <span class="metadata-value">@Model.Metadata.PdfVersion</span>
+                        <div class="metadata-item metadata-item-wide">
+                            <span class="metadata-label">Form</span>
+                            <span class="metadata-value">
+                                @(Model.Metadata.HasForm ? "Yes" : "No") &bull; XFA: @(Model.Metadata.HasXfa ? "Yes" : "No") &bull; Fields: @Model.Metadata.FormFieldCount
+                            </span>
                         </div>
-                        <div class="metadata-item">
-                            <span class="metadata-label">Pages</span>
-                            <span class="metadata-value">@Model.Metadata.PageCount</span>
-                        </div>
-                        @if (!string.IsNullOrEmpty(Model.Metadata.PageSize))
-                        {
-                            <div class="metadata-item">
-                                <span class="metadata-label">Page Size</span>
-                                <span class="metadata-value">@Model.Metadata.PageSize</span>
-                            </div>
-                        }
-                        <div class="metadata-item">
-                            <span class="metadata-label">Has Form</span>
-                            <span class="metadata-value">@(Model.Metadata.HasForm ? "Yes" : "No")</span>
-                        </div>
-                        <div class="metadata-item">
-                            <span class="metadata-label">Has XFA</span>
-                            <span class="metadata-value">@(Model.Metadata.HasXfa ? "Yes" : "No")</span>
-                        </div>
-                        <div class="metadata-item">
-                            <span class="metadata-label">Form Fields</span>
-                            <span class="metadata-value">@Model.Metadata.FormFieldCount</span>
-                        </div>
-                        <div class="metadata-item">
-                            <span class="metadata-label">Encrypted</span>
-                            <span class="metadata-value">@(Model.Metadata.IsEncrypted ? "Yes" : "No")</span>
-                        </div>
-                        @if (!string.IsNullOrEmpty(Model.Metadata.CreationDate))
-                        {
-                            <div class="metadata-item">
-                                <span class="metadata-label">Created</span>
-                                <span class="metadata-value">@Model.Metadata.CreationDate</span>
-                            </div>
-                        }
-                        @if (!string.IsNullOrEmpty(Model.Metadata.ModDate))
-                        {
-                            <div class="metadata-item">
-                                <span class="metadata-label">Modified</span>
-                                <span class="metadata-value">@Model.Metadata.ModDate</span>
-                            </div>
-                        }
-                        @if (!string.IsNullOrEmpty(Model.Metadata.Producer))
+                        @if (!string.IsNullOrEmpty(Model.Metadata.CreationDate) || !string.IsNullOrEmpty(Model.Metadata.ModDate))
                         {
                             <div class="metadata-item metadata-item-wide">
-                                <span class="metadata-label">Producer</span>
-                                <span class="metadata-value" title="@Model.Metadata.Producer">@Model.Metadata.Producer</span>
+                                <span class="metadata-label">Dates</span>
+                                <span class="metadata-value">
+                                    @if (!string.IsNullOrEmpty(Model.Metadata.CreationDate)) { <text>Created: @Model.Metadata.CreationDate</text> }
+                                    @if (!string.IsNullOrEmpty(Model.Metadata.CreationDate) && !string.IsNullOrEmpty(Model.Metadata.ModDate)) { <text>&bull;</text> }
+                                    @if (!string.IsNullOrEmpty(Model.Metadata.ModDate)) { <text>Modified: @Model.Metadata.ModDate</text> }
+                                </span>
                             </div>
                         }
-                        @if (!string.IsNullOrEmpty(Model.Metadata.Creator))
+                        @if (!string.IsNullOrEmpty(Model.Metadata.Producer) || !string.IsNullOrEmpty(Model.Metadata.Creator))
                         {
                             <div class="metadata-item metadata-item-wide">
-                                <span class="metadata-label">Creator</span>
-                                <span class="metadata-value" title="@Model.Metadata.Creator">@Model.Metadata.Creator</span>
+                                <span class="metadata-label">Origin</span>
+                                <span class="metadata-value">
+                                    @if (!string.IsNullOrEmpty(Model.Metadata.Producer)) { <text>Producer: @Model.Metadata.Producer</text> }
+                                    @if (!string.IsNullOrEmpty(Model.Metadata.Producer) && !string.IsNullOrEmpty(Model.Metadata.Creator)) { <text>&bull;</text> }
+                                    @if (!string.IsNullOrEmpty(Model.Metadata.Creator)) { <text>Creator: @Model.Metadata.Creator</text> }
+                                </span>
                             </div>
                         }
                     </div>
