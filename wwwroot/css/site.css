@@ -433,8 +433,9 @@ html, body {
 
 .metadata-item {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
 }
 
 .metadata-item-wide {
@@ -447,6 +448,10 @@ html, body {
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+}
+
+.metadata-label::after {
+    content: ":";
 }
 
 .metadata-value {

@@ -1,4 +1,4 @@
-﻿namespace UsefulPdfNet.Models;
+namespace UsefulPdfNet.Models;
 
 /// <summary>
 /// Holds metadata extracted from a PDF document for display in the UI.
@@ -10,6 +10,7 @@ public class PdfMetadata
     public string PdfVersion { get; set; } = string.Empty;
     public int PageCount { get; set; }
     public bool HasForm { get; set; }
+    public bool HasXfa { get; set; }
     public int FormFieldCount { get; set; }
     public bool IsEncrypted { get; set; }
     public string? Producer { get; set; }

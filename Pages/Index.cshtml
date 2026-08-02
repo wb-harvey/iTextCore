@@ -97,6 +97,10 @@
                             <span class="metadata-value">@(Model.Metadata.HasForm ? "Yes" : "No")</span>
                         </div>
                         <div class="metadata-item">
+                            <span class="metadata-label">Has XFA</span>
+                            <span class="metadata-value">@(Model.Metadata.HasXfa ? "Yes" : "No")</span>
+                        </div>
+                        <div class="metadata-item">
                             <span class="metadata-label">Form Fields</span>
                             <span class="metadata-value">@Model.Metadata.FormFieldCount</span>
                         </div>

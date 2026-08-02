@@ -97,6 +97,9 @@ public class PdfFormService
             metadata.PageCount = reader.NumberOfPages;
             metadata.IsEncrypted = reader.IsEncrypted();
             metadata.HasForm = reader.AcroFields?.Fields?.Count > 0;
+            
+            var acroFormDict = reader.Catalog?.GetAsDict(PdfName.ACROFORM);
+            metadata.HasXfa = acroFormDict != null && acroFormDict.Contains(PdfName.XFA);
 
             // Extract page size from the first page (in PDF points: 72 points = 1 inch)
             if (reader.NumberOfPages > 0)
