@@ -1,4 +1,4 @@
-﻿# UsefulPdfNet 10.0.1 (LGPL / MPL)
+# UsefulPdfNet 10.0.1 (LGPL / MPL)
 
 Copyright (c) 2026 William Harvey
 
@@ -36,6 +36,8 @@ Code generation and contributions by Claude Opus 4.6.
 Code reviews by Gemini Pro 3.1.
 
 - **[Add]** Added support for AES-256 encrypted PDF files (R-5, R-6 encryptions).
+- **[Add]** Added `CleansePDF` method to programmatically remove digital certificates and signature blocks.
+- **[Add]** Added digital signature metadata extraction (`HasSignatures`, `SignatureNames`).
 - **[Change]** Removed NuGet packaging.
 - **[Change]** Removed legacy .NET (4.0, 4.5) frameworks.
 - **[Change]** Strip XFA (XML Forms Architecture) contents for exported PDF files.
@@ -62,4 +64,4 @@ XFA was a failed attempt by Adobe to force a proprietary forms structure into PD
 
 eSignatures are an ongoing issue. Many providers offer various levels of verifiable eSignature capabilities and stuff them into PDF documents. This adds layers of proprietary digital signing and modifications to PDF files to verify provenance. The vendors trying this start with Adobe and continue down the alphabet. It's a mess. 
 
-This version of UsefulPdfNet does not support XFA or eSignatures.
+This version of UsefulPdfNet supports the enumeration and stripping of eSignatures from PDF files.
