@@ -101,6 +101,19 @@ public class PdfFormService
             var acroFormDict = reader.Catalog?.GetAsDict(PdfName.ACROFORM);
             metadata.HasXfa = acroFormDict != null && acroFormDict.Contains(PdfName.XFA);
 
+            if (reader.AcroFields != null)
+            {
+                var sigNames = reader.AcroFields.GetSignatureNames();
+                if (sigNames != null)
+                {
+                    foreach (string name in sigNames)
+                    {
+                        metadata.SignatureNames.Add(name);
+                    }
+                    metadata.HasSignatures = metadata.SignatureNames.Count > 0;
+                }
+            }
+
             // Extract page size from the first page (in PDF points: 72 points = 1 inch)
             if (reader.NumberOfPages > 0)
             {
@@ -168,6 +181,93 @@ public class PdfFormService
         }
 
         return pdfDate;
+    }
+
+    /// <summary>
+    /// Fills form fields in the PDF (from memory) with the provided values and returns the resulting PDF bytes.
+    /// By default, the output PDF has no owner password, no encryption, and no certificates.
+    /// Set the keep* parameters to true to preserve the original security settings.
+    /// </summary>
+    public byte[] FillForm(
+        byte[] pdfBytes,
+        Dictionary<string, string> fieldValues,
+        bool flatten = false,
+        bool keepSignatures = false,
+        bool keepOwnerPassword = false,
+        bool keepEncryption = false,
+        bool keepCertificates = false,
+        float textPaddingY = 0f)
+    {
+        PdfReader? reader = null;
+        PdfStamper? stamper = null;
+        var outputStream = new MemoryStream();
+
+        try
+        {
+            // Enable bypass so PdfStamper doesn't throw on encrypted PDFs
+            // even when the owner password is unknown
+            PdfReader.AllowOpenWithoutOwnerPassword = true;
+
+            reader = new PdfReader(pdfBytes);
+            
+            // Remove Adobe Reader Extended Features (Usage Rights) which restrict document changes.
+            reader.RemoveUsageRights();
+
+            if (keepEncryption || keepOwnerPassword || keepCertificates)
+            {
+                // Append mode preserves the original encryption, owner password,
+                // and certificate settings from the source PDF
+                stamper = new PdfStamper(reader, outputStream, '\0', true);
+            }
+            else
+            {
+                // Standard mode rewrites the PDF without encryption,
+                // producing a clean output with no security restrictions
+                stamper = new PdfStamper(reader, outputStream);
+            }
+
+            // Remove XFA from the PDF to prevent Adobe Acrobat from throwing type validation 
+            // errors (e.g. "Invalid value 'Off' specified for element...") during form synchronization.
+            var acroFormDict = reader.Catalog?.GetAsDict(PdfName.ACROFORM);
+            acroFormDict?.Remove(PdfName.XFA);
+
+            var acroFields = stamper.AcroFields;
+            
+            if (acroFields != null)
+            {
+                if (textPaddingY != 0f)
+                {
+                    acroFields.SetExtraMargin(0f, textPaddingY);
+                }
+                if (!keepSignatures)
+                {
+                    // Remove any actual signature fields
+                    var sigNames = acroFields.GetSignatureNames();
+                    foreach (string name in sigNames)
+                    {
+                        acroFields.RemoveField(name);
+                    }
+                    
+                    // Remove SigFlags from AcroForm so viewers don't expect a signature
+                    acroFormDict?.Remove(PdfName.SIGFLAGS);
+                }
+
+                foreach (var kvp in fieldValues)
+                {
+                    acroFields.SetField(kvp.Key, kvp.Value);
+                }
+            }
+
+            stamper.FormFlattening = flatten;
+        }
+        finally
+        {
+            stamper?.Close();
+            reader?.Close();
+            PdfReader.AllowOpenWithoutOwnerPassword = false;
+        }
+
+        return outputStream.ToArray();
     }
 
     /// <summary>
@@ -246,6 +346,64 @@ public class PdfFormService
             }
 
             stamper.FormFlattening = flatten;
+        }
+        finally
+        {
+            stamper?.Close();
+            reader?.Close();
+            PdfReader.AllowOpenWithoutOwnerPassword = false;
+        }
+
+        return outputStream.ToArray();
+    }
+
+    /// <summary>
+    /// Opens a PDF, removes any digital certificates, signatures, XFA, and usage rights, 
+    /// and returns the cleansed PDF bytes.
+    /// </summary>
+    public byte[] CleansePDF(string pdfPath)
+    {
+        return CleansePDF(File.ReadAllBytes(pdfPath));
+    }
+
+    /// <summary>
+    /// Reads PDF bytes, removes any digital certificates, signatures, XFA, and usage rights, 
+    /// and returns the cleansed PDF bytes.
+    /// </summary>
+    public byte[] CleansePDF(byte[] pdfBytes)
+    {
+        PdfReader? reader = null;
+        PdfStamper? stamper = null;
+        var outputStream = new MemoryStream();
+
+        try
+        {
+            PdfReader.AllowOpenWithoutOwnerPassword = true;
+            reader = new PdfReader(pdfBytes);
+            
+            // Remove Adobe Reader Extended Features (Usage Rights)
+            reader.RemoveUsageRights();
+
+            // Standard mode rewrites the PDF without encryption and drops certificates
+            stamper = new PdfStamper(reader, outputStream);
+
+            // Remove XFA
+            var acroFormDict = reader.Catalog?.GetAsDict(PdfName.ACROFORM);
+            acroFormDict?.Remove(PdfName.XFA);
+
+            var acroFields = stamper.AcroFields;
+            if (acroFields != null)
+            {
+                // Remove any actual signature fields
+                var sigNames = acroFields.GetSignatureNames();
+                foreach (string name in sigNames)
+                {
+                    acroFields.RemoveField(name);
+                }
+                
+                // Remove SigFlags from AcroForm so viewers don't expect a signature
+                acroFormDict?.Remove(PdfName.SIGFLAGS);
+            }
         }
         finally
         {

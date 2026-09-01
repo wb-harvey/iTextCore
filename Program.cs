@@ -1,4 +1,4 @@
-﻿using UsefulPdfNet.Services;
+using UsefulPdfNet.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +11,8 @@ var app = builder.Build();
 // Ensure uploads directory exists
 var uploadsPath = Path.Combine(app.Environment.WebRootPath, "uploads");
 Directory.CreateDirectory(uploadsPath);
+
+
 
 if (!app.Environment.IsDevelopment())
 {

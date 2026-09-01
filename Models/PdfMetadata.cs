@@ -11,6 +11,8 @@ public class PdfMetadata
     public int PageCount { get; set; }
     public bool HasForm { get; set; }
     public bool HasXfa { get; set; }
+    public bool HasSignatures { get; set; }
+    public List<string> SignatureNames { get; set; } = new();
     public int FormFieldCount { get; set; }
     public bool IsEncrypted { get; set; }
     public string? Producer { get; set; }
